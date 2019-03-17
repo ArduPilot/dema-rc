@@ -78,10 +78,10 @@ int main(int argc, char *argv[])
     if (r == ARGS_RESULT_EXIT)
         return 0;
     if (r == ARGS_RESULT_FAILURE)
-        goto exit;
+        goto fail;
 
     return 0;
 
-exit:
+fail:
     return EXIT_FAILURE;
 }
