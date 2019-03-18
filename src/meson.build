@@ -4,7 +4,8 @@
 exe_dema_rc = executable(
     'dema-rc',
     [
-      'main.c'
+      'main.c',
+      'controller.c',
     ],
     install: true
 )

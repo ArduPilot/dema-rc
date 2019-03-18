@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "controller.h"
+
 enum ArgsResult {
     /* fail to parse options */
     ARGS_RESULT_FAILURE = -1,
@@ -80,6 +82,12 @@ int main(int argc, char *argv[])
         return 0;
     if (r == ARGS_RESULT_FAILURE)
         goto fail;
+
+    r = controller_init(device);
+    if (r)
+        goto fail;
+
+    controller_shutdown();
 
     return 0;
 
