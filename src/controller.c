@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "event_loop.h"
 #include "log.h"
 #include "util.h"
 
@@ -116,13 +117,44 @@ static int evdev_fill_info(int fd, struct Controller *c)
     return 0;
 }
 
+static void evdev_handler(int fd, void *data, int ev_mask)
+{
+    static int count;
+
+    count++;
+
+    if (count > 10)
+        event_loop_stop();
+
+    if (ev_mask & EPOLLIN) {
+        struct input_event events[64], *e;
+        int r;
+
+        r = read(fd, events, sizeof(events));
+        if (r < 0) {
+            log_error("read: %m\n");
+            goto done;
+        }
+        if ((size_t)r < sizeof(*events)) {
+            log_warning("expected at least %zu bytes\n", sizeof(*events));
+            goto done;
+        }
+
+        for (e = events; e < events + r / sizeof(*events); e++)
+            log_debug("received event type=%d code=%d\n", e->type, e->code);
+    }
+
+done:
+    return;
+}
+
 int controller_init(const char *device)
 {
     int fd, r;
 
     controller.fd = -1;
 
-    fd = open(device, O_RDONLY | O_CLOEXEC);
+    fd = open(device, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
         log_error("can't open %s: %m", device);
         return -errno;
@@ -134,9 +166,13 @@ int controller_init(const char *device)
         goto fail_fill;
 
     controller.fd = fd;
+    if (event_loop_add_source(fd, NULL, EPOLLIN, evdev_handler) < 0)
+        goto fail_loop;
 
     return 0;
 
+fail_loop:
+    controller.fd = -1;
 fail_fill:
     close(fd);
     return r;
@@ -147,5 +183,6 @@ void controller_shutdown(void)
     if (controller.fd < 0)
         return;
 
+    event_loop_remove_source(controller.fd);
     close(controller.fd);
 }

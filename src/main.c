@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "controller.h"
+#include "event_loop.h"
 #include "log.h"
 
 enum ArgsResult {
@@ -94,14 +95,25 @@ int main(int argc, char *argv[])
     if (verbose)
         log_set_max_level(LOG_DEBUG);
 
-    r = controller_init(device);
-    if (r)
+    r = event_loop_init();
+    if (r < 0)
         goto fail;
 
+    r = controller_init(device);
+    if (r < 0)
+        goto fail_controller;
+
+    event_loop_run();
+
     controller_shutdown();
+    event_loop_shutdown();
+    log_shutdown();
 
     return 0;
 
+fail_controller:
+    event_loop_shutdown();
 fail:
+    log_shutdown();
     return EXIT_FAILURE;
 }
