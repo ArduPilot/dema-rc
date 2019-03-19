@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "controller.h"
+#include "log.h"
 
 enum ArgsResult {
     /* fail to parse options */
@@ -18,6 +19,7 @@ enum ArgsResult {
 };
 
 static const char *device;
+static bool verbose;
 
 static void help(FILE *fp)
 {
@@ -26,6 +28,7 @@ static void help(FILE *fp)
             "optional arguments:\n"
             " --version             Show version\n"
             " -h --help             Print this message\n"
+            " -v --verbose          Print debug messages\n"
             "\n"
             "mandatory argument:\n"
             " <input_device>        Controller's input device\n",
@@ -40,9 +43,10 @@ static enum ArgsResult parse_args(int argc, char *argv[])
     static const struct option long_options[] = {
         {"help", no_argument, NULL, 'h'},
         {"version", no_argument, NULL, ARG_VERSION},
+        {"verbose", no_argument, NULL, 'v'},
         {},
     };
-    static const char *short_options = "h";
+    static const char *short_options = "vh";
     int c;
 
     while ((c = getopt_long(argc, argv, short_options, long_options, NULL)) >= 0) {
@@ -50,6 +54,9 @@ static enum ArgsResult parse_args(int argc, char *argv[])
         case 'h':
             help(stdout);
             return ARGS_RESULT_EXIT;
+        case 'v':
+            verbose = true;
+            break;
         case ARG_VERSION:
             puts(PACKAGE " version " PACKAGE_VERSION);
             return ARGS_RESULT_EXIT;
@@ -82,6 +89,10 @@ int main(int argc, char *argv[])
         return 0;
     if (r == ARGS_RESULT_FAILURE)
         goto fail;
+
+    log_init();
+    if (verbose)
+        log_set_max_level(LOG_DEBUG);
 
     r = controller_init(device);
     if (r)
