@@ -4,6 +4,7 @@
 exe_dema_rc = executable(
     'dema-rc',
     [
+      'array.c',
       'log.c',
       'main.c',
       'controller.c',
