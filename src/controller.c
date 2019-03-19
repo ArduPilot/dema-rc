@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "log.h"
 #include "util.h"
 
 enum InfoAbs {
@@ -76,7 +77,7 @@ static int evdev_fill_info(int fd, struct Controller *c)
     memset(mask, 0, sizeof(mask));
     ioctl(fd, EVIOCGBIT(0, EV_MAX), mask);
     if (!test_bit(EV_ABS, mask)) {
-        fprintf(stderr, "EV_ABS event is not supported\n");
+        log_error("EV_ABS event is not supported\n");
         return -EINVAL;
     }
 
@@ -100,17 +101,18 @@ static int evdev_fill_info(int fd, struct Controller *c)
         c->info.range[axis][INFO_ABS_MIN] = abs.min;
         c->info.range[axis][INFO_ABS_MAX] = abs.max;
 
-        printf("axis: %d min: %d max: %d\n", axis, abs.min, abs.max);
+        log_debug("axis: %d min: %d max: %d\n", axis, abs.min, abs.max);
 
         naxis++;
     }
 
     if (naxis < _AXIS_COUNT) {
-        fprintf(stderr, "Not all required axis supported by this input\n");
+        log_error("Not all required axis supported by this input\n");
         return -EINVAL;
     }
 
-    printf("controller ok\n");
+    log_debug("controller ok\n");
+
     return 0;
 }
 
@@ -122,7 +124,7 @@ int controller_init(const char *device)
 
     fd = open(device, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
-        fprintf(stderr, "error: can't open %s: %m", device);
+        log_error("can't open %s: %m", device);
         return -errno;
     }
 
