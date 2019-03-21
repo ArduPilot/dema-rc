@@ -57,6 +57,21 @@ static const int evdev_mapping[] = {
     [AXIS_YAW] = ABS_X,  [AXIS_AUX_LEFT] = ABS_RY,
 };
 
+static uint16_t controller_scale(struct Controller *c, enum Axis axis, int val)
+{
+    int rmin = c->info.range[axis][INFO_ABS_MIN];
+    int rmax = c->info.range[axis][INFO_ABS_MAX];
+
+    /* constrain values to range - linux input doesn't do this for us */
+    val = constrain(val, rmin, rmax);
+
+    /* transpose to [1000, 2000], or close to it */
+    val -= rmin;
+    val = val * (1000 / (rmax - rmin)) + 1000;
+
+    return (uint16_t)val;
+}
+
 static int get_axis_from_evdev(unsigned long code)
 {
     int e;
@@ -124,6 +139,7 @@ static int evdev_fill_info(int fd, struct Controller *c)
 
 static void evdev_handler(int fd, void *data, int ev_mask)
 {
+    struct Controller *c = data;
     static int count;
 
     count++;
@@ -133,7 +149,7 @@ static void evdev_handler(int fd, void *data, int ev_mask)
 
     if (ev_mask & EPOLLIN) {
         struct input_event events[64], *e;
-        int r;
+        int r, axis;
 
         r = read(fd, events, sizeof(events));
         if (r < 0) {
@@ -145,8 +161,20 @@ static void evdev_handler(int fd, void *data, int ev_mask)
             goto done;
         }
 
-        for (e = events; e < events + r / sizeof(*events); e++)
-            log_debug("received event type=%d code=%d\n", e->type, e->code);
+        for (e = events; e < events + r / sizeof(*events); e++) {
+            if (e->type != EV_ABS)
+                continue;
+
+            axis = get_axis_from_evdev(e->code);
+            if (axis < 0) {
+                log_debug("ignoring axis %u\n", e->code);
+                return;
+            }
+
+            c->val[axis] = controller_scale(c, axis, e->value);
+
+            log_debug("received event axix=%d val=%u\n", axis, c->val[axis]);
+        }
     }
 
 done:
@@ -175,7 +203,7 @@ int controller_init(const char *device)
         goto fail_fill;
 
     controller.fd = fd;
-    if (event_loop_add_source(fd, NULL, EPOLLIN, evdev_handler) < 0)
+    if (event_loop_add_source(fd, &controller, EPOLLIN, evdev_handler) < 0)
         goto fail_loop;
 
     return 0;
