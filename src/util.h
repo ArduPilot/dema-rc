@@ -15,3 +15,27 @@ static inline int test_bit(int n, unsigned long *bitmask)
 {
     return 1UL & (bitmask[n / BITS_PER_LONG] >> (n & (BITS_PER_LONG - 1)));
 }
+
+#define max(x, y)              \
+    ({                         \
+        __auto_type __x = x;   \
+        __auto_type __y = y;   \
+        __x > __y ? __x : __y; \
+    })
+
+#define min(x, y)              \
+    ({                         \
+        __auto_type __x = x;   \
+        __auto_type __y = y;   \
+        __x < __y ? __x : __y; \
+    })
+
+/* clang-format off */
+#define constrain(val, rmin, rmax)  \
+    ({                              \
+        __auto_type __val = (val);  \
+        __val <= rmin ? rmin :      \
+        __val >= rmax ? rmax :      \
+        __val;                      \
+    })
+/* clang-format on */
