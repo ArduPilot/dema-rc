@@ -10,10 +10,10 @@
 
 /* clang-format off */
 #define COLOR_RED          "\033[31m"
-#define COLOR_LIGHTBLUE    "\033[34;1m"
+#define COLOR_GREY         "\033[37m"
 #define COLOR_YELLOW       "\033[33;1m"
 #define COLOR_ORANGE       "\033[0;33m"
-#define COLOR_WHITE        "\033[37;1m"
+#define COLOR_WHITE        "\033[39m"
 #define COLOR_RESET        "\033[0m"
 
 static struct {
@@ -28,8 +28,8 @@ static struct {
 /* clang-format on */
 
 static const char *level_colors[] = {
-    [LOG_ERR] = COLOR_RED,    [LOG_WARNING] = COLOR_ORANGE,  [LOG_NOTICE] = COLOR_YELLOW,
-    [LOG_INFO] = COLOR_WHITE, [LOG_DEBUG] = COLOR_LIGHTBLUE,
+    [LOG_ERR] = COLOR_RED,    [LOG_WARNING] = COLOR_ORANGE, [LOG_NOTICE] = COLOR_YELLOW,
+    [LOG_INFO] = COLOR_WHITE, [LOG_DEBUG] = COLOR_GREY,
 };
 
 void log_init(void)
