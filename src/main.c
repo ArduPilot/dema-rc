@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "controller.h"
+#include "demarc_signal.h"
 #include "event_loop.h"
 #include "log.h"
 
@@ -99,6 +100,10 @@ int main(int argc, char *argv[])
     if (r < 0)
         goto fail;
 
+    r = signal_init();
+    if (r < 0)
+        goto fail_signal;
+
     r = controller_init(device);
     if (r < 0)
         goto fail_controller;
@@ -106,12 +111,15 @@ int main(int argc, char *argv[])
     event_loop_run();
 
     controller_shutdown();
+    signal_shutdown();
     event_loop_shutdown();
     log_shutdown();
 
     return 0;
 
 fail_controller:
+    signal_shutdown();
+fail_signal:
     event_loop_shutdown();
 fail:
     log_shutdown();
