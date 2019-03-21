@@ -68,6 +68,11 @@ static int get_axis_from_evdev(unsigned long code)
     return -1;
 }
 
+static int evdev_grab_device(int fd)
+{
+    return ioctl(fd, EVIOCGRAB, (void *)1);
+}
+
 static int evdev_fill_info(int fd, struct Controller *c)
 {
     /* query events and codes supported */
@@ -159,6 +164,10 @@ int controller_init(const char *device)
         log_error("can't open %s: %m", device);
         return -errno;
     }
+
+    r = evdev_grab_device(fd);
+    if (r != 0)
+        log_warning("Could not grab device %s: no exclusive access\n", device);
 
     /* TODO: use EVIOCGID and check device id to support other controllers */
     r = evdev_fill_info(fd, &controller);
