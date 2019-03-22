@@ -16,6 +16,8 @@ static inline int test_bit(int n, unsigned long *bitmask)
     return 1UL & (bitmask[n / BITS_PER_LONG] >> (n & (BITS_PER_LONG - 1)));
 }
 
+int safe_atoul(const char *s, unsigned long *ret);
+
 #define max(x, y)              \
     ({                         \
         __auto_type __x = x;   \

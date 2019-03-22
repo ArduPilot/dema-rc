@@ -10,6 +10,7 @@ exe_dema_rc = executable(
       'main.c',
       'controller.c',
       'signal.c',
+      'util.c',
     ],
     install: true
 )
