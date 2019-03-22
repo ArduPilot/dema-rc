@@ -1,0 +1,8 @@
+{
+   eviocgrab
+   Memcheck:Param
+   ioctl(generic)
+   fun:ioctl
+   fun:evdev_grab_device
+}
+
