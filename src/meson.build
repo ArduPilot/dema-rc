@@ -9,6 +9,7 @@ exe_dema_rc = executable(
       'event_loop.c',
       'log.c',
       'main.c',
+      'remote.c',
       'signal.c',
       'util.c',
     ],

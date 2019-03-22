@@ -10,6 +10,7 @@
 #include "demarc_signal.h"
 #include "event_loop.h"
 #include "log.h"
+#include "remote.h"
 
 enum ArgsResult {
     /* fail to parse options */
@@ -21,19 +22,21 @@ enum ArgsResult {
 };
 
 static const char *device;
+static const char *remote_dest;
 static bool verbose;
 
 static void help(FILE *fp)
 {
     fprintf(fp,
-            "%s [OPTIONS...] <input_device>\n\n"
+            "%s [OPTIONS...] <input_device> [dest]\n\n"
             "optional arguments:\n"
             " --version             Show version\n"
             " -h --help             Print this message\n"
             " -v --verbose          Print debug messages\n"
             "\n"
-            "mandatory argument:\n"
-            " <input_device>        Controller's input device\n",
+            "positional arguments:\n"
+            " <input_device>        Controller's input device\n"
+            " [dest]                Optional destination - default 127.0.0.1:777\n",
             program_invocation_short_name);
 }
 
@@ -49,7 +52,7 @@ static enum ArgsResult parse_args(int argc, char *argv[])
         {},
     };
     static const char *short_options = "vh";
-    int c;
+    int c, positional;
 
     while ((c = getopt_long(argc, argv, short_options, long_options, NULL)) >= 0) {
         switch (c) {
@@ -70,14 +73,19 @@ static enum ArgsResult parse_args(int argc, char *argv[])
         }
     }
 
+    positional = argc - optind;
+
     /* mandatory arg: input device*/
-    if (optind + 1 != argc) {
+    if (positional < 1) {
         fprintf(stderr, "error: input device is required\n");
         help(stderr);
         return ARGS_RESULT_FAILURE;
     }
 
-    device = argv[optind];
+    device = argv[optind++];
+
+    if (positional == 2)
+        remote_dest = argv[optind];
 
     return ARGS_RESULT_SUCCESS;
 }
@@ -108,8 +116,13 @@ int main(int argc, char *argv[])
     if (r < 0)
         goto fail_controller;
 
+    r = remote_init(remote_dest);
+    if (r < 0)
+        goto fail_remote;
+
     event_loop_run();
 
+    remote_shutdown();
     controller_shutdown();
     signal_shutdown();
     event_loop_shutdown();
@@ -117,6 +130,8 @@ int main(int argc, char *argv[])
 
     return 0;
 
+fail_remote:
+    remote_shutdown();
 fail_controller:
     signal_shutdown();
 fail_signal:
