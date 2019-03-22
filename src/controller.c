@@ -85,7 +85,7 @@ static int get_axis_from_evdev(unsigned long code)
 
 static int evdev_grab_device(int fd)
 {
-    return ioctl(fd, EVIOCGRAB, (void *)1);
+    return ioctl(fd, EVIOCGRAB, 1UL);
 }
 
 static int evdev_fill_info(int fd, struct Controller *c)
