@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <inttypes.h>
 #include <stdlib.h>
 
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
@@ -49,4 +50,16 @@ int safe_atoul(const char *s, unsigned long *ret);
         __val >= rmax ? rmax :      \
         __val;                      \
     })
+
+typedef uint64_t usec_t;
+typedef uint64_t nsec_t;
+#define USEC_INFINITY ((usec_t) -1)
+
+#define MSEC_PER_SEC  1000ULL
+#define USEC_PER_SEC  ((usec_t) 1000000ULL)
+#define USEC_PER_MSEC ((usec_t) 1000ULL)
+#define NSEC_PER_SEC  ((nsec_t) 1000000000ULL)
+#define NSEC_PER_MSEC ((nsec_t) 1000000ULL)
+#define NSEC_PER_USEC ((nsec_t) 1000ULL)
+
 /* clang-format on */
