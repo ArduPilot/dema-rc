@@ -7,19 +7,32 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/timerfd.h>
 #include <unistd.h>
 
 #include "array.h"
 #include "log.h"
+#include "util.h"
 
 /* clang-format off */
 
 #define DEFAULT_SOURCE_CAPACITY 16
 
+enum EventType {
+    EVENT_GENERIC,
+    EVENT_TIMEOUT,
+};
+
 struct EventSource {
     void *user_data;
     EventCallback cb;
     int fd;
+    enum EventType type;
+};
+
+struct TimeoutSource {
+    struct EventSource event;
+    struct itimerspec ts;
 };
 
 static struct {
@@ -141,6 +154,53 @@ int event_loop_remove_source(int fd)
     log_debug("source %d removed\n", fd);
 
     return 0;
+}
+
+struct EventSource *event_loop_add_timeout(unsigned long timeout_msec, void *data, EventCallback cb)
+{
+    struct TimeoutSource *source;
+    int r, fd;
+
+    fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    if (fd < 0) {
+        log_error("unable to create timerfd: %m\n");
+        return NULL;
+    }
+
+    source = calloc(1, sizeof(*source));
+    if (!source) {
+        log_error("Could not add source (%m)\n");
+        goto fail_alloc;
+    }
+
+    r = _event_loop_add_source(&source->event, fd, data, EPOLLIN, cb);
+    if (r < 0)
+        goto fail_add_source;
+
+    source->ts.it_interval.tv_sec = timeout_msec / MSEC_PER_SEC;
+    source->ts.it_interval.tv_nsec = (timeout_msec % MSEC_PER_SEC) * NSEC_PER_MSEC;
+    source->ts.it_value.tv_sec = source->ts.it_interval.tv_sec;
+    source->ts.it_value.tv_nsec = source->ts.it_interval.tv_nsec;
+
+    /* start timeout */
+    timerfd_settime(fd, 0, &source->ts, NULL);
+
+    return &source->event;
+
+fail_add_source:
+    free(source);
+fail_alloc:
+    close(fd);
+    return NULL;
+}
+
+int event_loop_remove_timeout(struct EventSource *source)
+{
+    assert(source->type == EVENT_TIMEOUT);
+
+    close(source->fd);
+
+    return event_loop_remove_source(source->fd);
 }
 
 void event_loop_stop(void)
