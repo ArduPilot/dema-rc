@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <stdlib.h>
+
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
 #define BITS_PER_BYTE 8
@@ -10,6 +12,13 @@
 
 /* how many longs needed to represent nr bits */
 #define BITMASK_NLONGS(n) DIV_ROUND_UP(n, BITS_PER_LONG)
+
+static inline void freep(void *p)
+{
+    free(*(void **)p);
+}
+
+#define _cleanup_free_ _cleanup_(freep)
 
 static inline int test_bit(int n, unsigned long *bitmask)
 {
