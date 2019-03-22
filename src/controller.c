@@ -5,6 +5,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <linux/input.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,6 +15,7 @@
 
 #include "event_loop.h"
 #include "log.h"
+#include "remote.h"
 #include "util.h"
 
 enum InfoAbs {
@@ -47,6 +49,8 @@ struct Controller {
     struct {
         int range[_AXIS_COUNT][_INFO_ABS_COUNT];
     } info;
+
+    struct EventSource *remote_update_timeout;
 };
 
 static struct Controller controller;
@@ -182,6 +186,19 @@ done:
     return;
 }
 
+static void remote_update_handler(int fd, void *data, int ev_mask)
+{
+    uint64_t count = 0;
+    int r;
+
+    r = read(fd, &count, sizeof(count));
+    if (r < 1 || count == 0)
+        return;
+
+    /* TODO */
+    printf("remote_update count=%" PRIu64 "\n", count);
+}
+
 int controller_init(const char *device)
 {
     int fd, r;
@@ -207,8 +224,15 @@ int controller_init(const char *device)
     if (event_loop_add_source(fd, &controller, EPOLLIN, evdev_handler) < 0)
         goto fail_loop;
 
+    controller.remote_update_timeout
+        = event_loop_add_timeout(MSEC_PER_SEC, &controller, remote_update_handler);
+    if (!controller.remote_update_timeout)
+        goto fail_timeout;
+
     return 0;
 
+fail_timeout:
+    event_loop_remove_source(fd);
 fail_loop:
     controller.fd = -1;
 fail_fill:
