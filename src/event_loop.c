@@ -58,17 +58,11 @@ void event_loop_shutdown(void)
     array_free_array(&ev_ctx.sources);
 }
 
-int event_loop_add_source(int fd, void *data, int ev_mask, EventCallback cb)
+static int _event_loop_add_source(struct EventSource *source, int fd, void *data,
+                                  int ev_mask, EventCallback cb)
 {
-    struct EventSource *source;
     struct epoll_event ev = { };
     int r;
-
-    source = calloc(1, sizeof(*source));
-    if (!source) {
-        log_error("Could not add source (%m)\n");
-        return -errno;
-    }
 
     r = array_append(&ev_ctx.sources, source);
     if (r < 0) {
@@ -96,8 +90,27 @@ int event_loop_add_source(int fd, void *data, int ev_mask, EventCallback cb)
 
 fail_epoll:
     array_pop(&ev_ctx.sources);
-    free(source);
     return r;
+}
+
+int event_loop_add_source(int fd, void *data, int ev_mask, EventCallback cb)
+{
+    struct EventSource *source;
+    int r;
+
+    source = calloc(1, sizeof(*source));
+    if (!source) {
+        log_error("Could not add source (%m)\n");
+        return -errno;
+    }
+
+    r = _event_loop_add_source(source, fd, data, ev_mask, cb);
+    if (r < 0) {
+        free(source);
+        return r;
+    }
+
+    return 0;
 }
 
 int event_loop_remove_source(int fd)
