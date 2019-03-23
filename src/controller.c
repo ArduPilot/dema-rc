@@ -145,39 +145,37 @@ static int evdev_fill_info(int fd, struct Controller *c)
 static void evdev_handler(int fd, void *data, int ev_mask)
 {
     struct Controller *c = data;
+    struct input_event events[64], *e;
+    int r, axis;
 
-    if (ev_mask & EPOLLIN) {
-        struct input_event events[64], *e;
-        int r, axis;
+    if (!(ev_mask & EPOLLIN))
+        return;
 
-        r = read(fd, events, sizeof(events));
-        if (r < 0) {
-            log_error("read: %m\n");
-            goto done;
-        }
-        if ((size_t)r < sizeof(*events)) {
-            log_warning("expected at least %zu bytes\n", sizeof(*events));
-            goto done;
-        }
-
-        for (e = events; e < events + r / sizeof(*events); e++) {
-            if (e->type != EV_ABS)
-                continue;
-
-            axis = get_axis_from_evdev(e->code);
-            if (axis < 0) {
-                log_debug("ignoring axis %u\n", e->code);
-                return;
-            }
-
-            c->val[axis] = controller_scale(c, axis, e->value);
-
-            log_debug("received event axix=%d val=%u\n", axis, c->val[axis]);
-        }
+    r = read(fd, events, sizeof(events));
+    if (r < 0) {
+        log_error("read: %m\n");
+        return;
     }
 
-done:
-    return;
+    if ((size_t)r < sizeof(*events)) {
+        log_warning("expected at least %zu bytes\n", sizeof(*events));
+        return;
+    }
+
+    for (e = events; e < events + r / sizeof(*events); e++) {
+        if (e->type != EV_ABS)
+            continue;
+
+        axis = get_axis_from_evdev(e->code);
+        if (axis < 0) {
+            log_debug("ignoring axis %u\n", e->code);
+            continue;
+        }
+
+        c->val[axis] = controller_scale(c, axis, e->value);
+
+        log_debug("received event axis=%d val=%u\n", axis, c->val[axis]);
+    }
 }
 
 static void remote_update_handler(int fd, void *data, int ev_mask)
