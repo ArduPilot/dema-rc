@@ -23,7 +23,7 @@ void log_printf(int level, const char *fmt, ...) _printf_format_(2, 3);
         int _level = (level);                       \
         if (log_get_max_level() >= LOG_PRI(_level)) \
             log_printf(_level, __VA_ARGS__);        \
-    } while (0);
+    } while (0)
 
 /* Normal logging */
 #define log_debug(...) _log(LOG_DEBUG, __VA_ARGS__)
