@@ -62,4 +62,6 @@ typedef uint64_t nsec_t;
 #define NSEC_PER_MSEC ((nsec_t) 1000000ULL)
 #define NSEC_PER_USEC ((nsec_t) 1000ULL)
 
+usec_t now_usec(void);
+
 /* clang-format on */
