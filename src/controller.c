@@ -145,12 +145,6 @@ static int evdev_fill_info(int fd, struct Controller *c)
 static void evdev_handler(int fd, void *data, int ev_mask)
 {
     struct Controller *c = data;
-    static int count;
-
-    count++;
-
-    if (count > 10)
-        event_loop_stop();
 
     if (ev_mask & EPOLLIN) {
         struct input_event events[64], *e;
