@@ -19,13 +19,51 @@
 #define DEFAULT_DEST "127.0.0.1"
 #define DEFAULT_PORT 777UL
 
+/* -- start AP RCINPUT_UDP protocol -- */
+
+#define RCINPUT_UDP_NUM_CHANNELS 8
+#define RCINPUT_UDP_VERSION 2
+
+/* All fields are Little Endian */
+struct _packed rc_udp_packet {
+    uint32_t version;
+    uint64_t timestamp_us;
+    uint16_t seq;
+    uint16_t ch[RCINPUT_UDP_NUM_CHANNELS];
+};
+
+/* ----------------------------------- */
+
 static struct {
     int sfd;
     struct sockaddr_in sockaddr;
+    struct rc_udp_packet pkt;
+    usec_t last_error_ts;
 } remote_ctx = {
     .sfd = -1,
 };
 
+void remote_send_pkt(int val[], int count)
+{
+    struct rc_udp_packet *pkt = &remote_ctx.pkt;
+    ssize_t r;
+    int i;
+
+    for (i = 0; i < count; i++)
+        pkt->ch[i] = val[i];
+
+    pkt->seq++;
+    pkt->timestamp_us = now_usec();
+
+    r = sendto(remote_ctx.sfd, pkt, sizeof(*pkt), 0, (struct sockaddr *)&remote_ctx.sockaddr,
+               sizeof(struct sockaddr));
+    if (r == -1 && errno != EAGAIN) {
+        if (errno != ECONNREFUSED && errno != ENETUNREACH)
+            log_error("could not send packet: %m\n");
+        else if (pkt->timestamp_us - remote_ctx.last_error_ts > 5 * USEC_PER_SEC)
+            log_debug("5s without sending update\n");
+    }
+}
 int remote_init(const char *remote_dest)
 {
     const char *addr;
@@ -57,6 +95,8 @@ int remote_init(const char *remote_dest)
         log_error("could not create socket: %m\n");
         return -errno;
     }
+
+    remote_ctx.pkt.version = RCINPUT_UDP_VERSION;
 
     return 0;
 }

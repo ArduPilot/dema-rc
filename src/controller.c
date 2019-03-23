@@ -18,6 +18,8 @@
 #include "remote.h"
 #include "util.h"
 
+#define REMOTE_UPDATE_INTERVAL 10
+
 enum InfoAbs {
     INFO_ABS_MIN,
     INFO_ABS_MAX,
@@ -180,6 +182,7 @@ static void evdev_handler(int fd, void *data, int ev_mask)
 
 static void remote_update_handler(int fd, void *data, int ev_mask)
 {
+    struct Controller *c = data;
     uint64_t count = 0;
     int r;
 
@@ -187,8 +190,7 @@ static void remote_update_handler(int fd, void *data, int ev_mask)
     if (r < 1 || count == 0)
         return;
 
-    /* TODO */
-    printf("remote_update count=%" PRIu64 "\n", count);
+    remote_send_pkt(c->val, _AXIS_COUNT);
 }
 
 int controller_init(const char *device)
@@ -217,7 +219,7 @@ int controller_init(const char *device)
         goto fail_loop;
 
     controller.remote_update_timeout
-        = event_loop_add_timeout(MSEC_PER_SEC, &controller, remote_update_handler);
+        = event_loop_add_timeout(REMOTE_UPDATE_INTERVAL, &controller, remote_update_handler);
     if (!controller.remote_update_timeout)
         goto fail_timeout;
 
@@ -238,5 +240,7 @@ void controller_shutdown(void)
         return;
 
     event_loop_remove_source(controller.fd);
+    event_loop_remove_timeout(controller.remote_update_timeout);
+
     close(controller.fd);
 }

@@ -5,3 +5,5 @@
 
 int remote_init(const char *remote_dest);
 void remote_shutdown(void);
+
+void remote_send_pkt(int val[], int count);

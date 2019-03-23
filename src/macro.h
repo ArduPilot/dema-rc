@@ -6,3 +6,4 @@
 #define _printf_format_(a, b) __attribute__((format(printf, a, b)))
 #define _pure_ __attribute__((pure))
 #define _cleanup_(x) __attribute__((cleanup(x)))
+#define _packed __attribute__((packed))
