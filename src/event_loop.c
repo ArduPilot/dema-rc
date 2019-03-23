@@ -181,9 +181,12 @@ struct EventSource *event_loop_add_timeout(unsigned long timeout_msec, void *dat
     source->ts.it_interval.tv_nsec = (timeout_msec % MSEC_PER_SEC) * NSEC_PER_MSEC;
     source->ts.it_value.tv_sec = source->ts.it_interval.tv_sec;
     source->ts.it_value.tv_nsec = source->ts.it_interval.tv_nsec;
+    source->event.type = EVENT_TIMEOUT;
 
     /* start timeout */
     timerfd_settime(fd, 0, &source->ts, NULL);
+
+    log_debug("timeout added: fd=%d\n", fd);
 
     return &source->event;
 
@@ -196,11 +199,15 @@ fail_alloc:
 
 int event_loop_remove_timeout(struct EventSource *source)
 {
+    int r, fd;
+
     assert(source->type == EVENT_TIMEOUT);
 
-    close(source->fd);
+    fd = source->fd;
+    r = event_loop_remove_source(fd);
+    close(fd);
 
-    return event_loop_remove_source(source->fd);
+    return r;
 }
 
 void event_loop_stop(void)
