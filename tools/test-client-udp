@@ -1,0 +1,14 @@
+#!/usr/bin/python3
+
+import time
+import struct
+
+from socket import *
+
+sock = socket(AF_INET, SOCK_DGRAM)
+sock.bind(('127.0.0.1', 777))
+
+while True:
+    pkt, address = sock.recvfrom(1024)
+    r = struct.unpack_from("=IQH" + 8 * "H", pkt)
+    print(r)
