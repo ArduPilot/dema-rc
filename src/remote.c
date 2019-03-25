@@ -27,44 +27,95 @@
 /* All fields are Little Endian */
 struct _packed rc_udp_packet {
     uint32_t version;
-    uint64_t timestamp_us;
+    uint64_t timestamp_usec;
     uint16_t seq;
     uint16_t ch[RCINPUT_UDP_NUM_CHANNELS];
 };
 
 /* ----------------------------------- */
 
+/* -- sitl -- */
+
+#define SITL_NUM_CHANNELS 8
+
+/* All fields are Little Endian */
+struct _packed rc_udp_sitl_packet {
+    uint16_t ch[SITL_NUM_CHANNELS];
+};
+/**/
+
 static struct {
     int sfd;
     struct sockaddr_in sockaddr;
-    struct rc_udp_packet pkt;
+    union {
+        struct rc_udp_packet pkt;
+        struct rc_udp_sitl_packet sitl_pkt;
+    };
+    enum RemoteOutputFormat format;
     usec_t last_error_ts;
 } remote_ctx = {
     .sfd = -1,
 };
 
-void remote_send_pkt(int val[], int count)
+static int _send(const void *buf, size_t len)
+{
+    int r = sendto(remote_ctx.sfd, buf, len, 0, (struct sockaddr *)&remote_ctx.sockaddr,
+                   sizeof(struct sockaddr));
+    if (r == -1 && errno != EAGAIN) {
+        if (errno != ECONNREFUSED && errno != ENETUNREACH)
+            log_error("could not send packet: %m\n");
+    }
+
+    return r;
+}
+
+static void sitl_send_pkt(const int val[], int count)
+{
+    struct rc_udp_sitl_packet *pkt = &remote_ctx.sitl_pkt;
+    int i;
+
+    assert(count <= RCINPUT_UDP_NUM_CHANNELS);
+
+    for (i = 0; i < count; i++)
+        pkt->ch[i] = val[i];
+
+    _send(pkt, sizeof(*pkt));
+}
+
+static void simple_send_pkt(const int val[], int count)
 {
     struct rc_udp_packet *pkt = &remote_ctx.pkt;
     ssize_t r;
     int i;
 
+    assert(count <= SITL_NUM_CHANNELS);
+
     for (i = 0; i < count; i++)
         pkt->ch[i] = val[i];
 
     pkt->seq++;
-    pkt->timestamp_us = now_usec();
+    pkt->timestamp_usec = now_usec();
 
-    r = sendto(remote_ctx.sfd, pkt, sizeof(*pkt), 0, (struct sockaddr *)&remote_ctx.sockaddr,
-               sizeof(struct sockaddr));
-    if (r == -1 && errno != EAGAIN) {
-        if (errno != ECONNREFUSED && errno != ENETUNREACH)
-            log_error("could not send packet: %m\n");
-        else if (pkt->timestamp_us - remote_ctx.last_error_ts > 5 * USEC_PER_SEC)
-            log_debug("5s without sending update\n");
+    r = _send(pkt, sizeof(*pkt));
+    if (r == -1 && pkt->timestamp_usec - remote_ctx.last_error_ts > 5 * USEC_PER_SEC) {
+        log_debug("5s without sending update\n");
+        remote_ctx.last_error_ts = pkt->timestamp_usec;
     }
 }
-int remote_init(const char *remote_dest)
+
+void remote_send_pkt(const int val[], int count)
+{
+    switch (remote_ctx.format) {
+    case REMOTE_OUTPUT_AP_UDP_SIMPLE:
+        return simple_send_pkt(val, count);
+    case REMOTE_OUTPUT_AP_SITL:
+        return sitl_send_pkt(val, count);
+    default:
+        break;
+    }
+}
+
+int remote_init(const char *remote_dest, enum RemoteOutputFormat format)
 {
     const char *addr;
     _cleanup_free_ char *buf = NULL;
@@ -79,7 +130,7 @@ int remote_init(const char *remote_dest)
         p = strchr(buf, ':');
         if (!p) {
             port = DEFAULT_PORT;
-        } else if (safe_atoul(p, &port) < 0) {
+        } else if (safe_atoul(p + 1, &port) < 0) {
             log_error("could not parse address %s\n", remote_dest);
             return -EINVAL;
         }
@@ -96,7 +147,10 @@ int remote_init(const char *remote_dest)
         return -errno;
     }
 
-    remote_ctx.pkt.version = RCINPUT_UDP_VERSION;
+    if (format == REMOTE_OUTPUT_AP_UDP_SIMPLE)
+        remote_ctx.pkt.version = RCINPUT_UDP_VERSION;
+
+    remote_ctx.format = format;
 
     return 0;
 }

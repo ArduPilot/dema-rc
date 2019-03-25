@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "controller.h"
 #include "demarc_signal.h"
@@ -23,7 +24,18 @@ enum ArgsResult {
 
 static const char *device;
 static const char *remote_dest;
+static enum RemoteOutputFormat remote_output_format = REMOTE_OUTPUT_AP_UDP_SIMPLE;
 static bool verbose;
+
+static enum RemoteOutputFormat output_format_from_str(const char *s)
+{
+    if (strcasecmp(s, "ardupilot-udp-simple") == 0)
+        return REMOTE_OUTPUT_AP_UDP_SIMPLE;
+    if (strcasecmp(s, "ardupilot-sitl") == 0)
+        return REMOTE_OUTPUT_AP_SITL;
+
+    return _REMOTE_OUTPUT_UNKNOWN;
+}
 
 static void help(FILE *fp)
 {
@@ -33,6 +45,8 @@ static void help(FILE *fp)
             " --version             Show version\n"
             " -h --help             Print this message\n"
             " -v --verbose          Print debug messages\n"
+            " -o --output-format    Output format. One of: ardupilot-udp-simple, ardupilot-sitl\n"
+            "                       (default: ardupilot-udp-simple)\n"
             "\n"
             "positional arguments:\n"
             " <input_device>        Controller's input device\n"
@@ -49,9 +63,10 @@ static enum ArgsResult parse_args(int argc, char *argv[])
         {"help", no_argument, NULL, 'h'},
         {"version", no_argument, NULL, ARG_VERSION},
         {"verbose", no_argument, NULL, 'v'},
+        {"output-format", required_argument, NULL, 'o'},
         {},
     };
-    static const char *short_options = "vh";
+    static const char *short_options = "vho:";
     int c, positional;
 
     while ((c = getopt_long(argc, argv, short_options, long_options, NULL)) >= 0) {
@@ -65,6 +80,13 @@ static enum ArgsResult parse_args(int argc, char *argv[])
         case ARG_VERSION:
             puts(PACKAGE " version " PACKAGE_VERSION);
             return ARGS_RESULT_EXIT;
+        case 'o':
+            remote_output_format = output_format_from_str(optarg);
+            if (remote_output_format == _REMOTE_OUTPUT_UNKNOWN) {
+                fprintf(stderr, "unknown format '%s'\n", optarg);
+                return ARGS_RESULT_FAILURE;
+            }
+            break;
         case '?':
             return ARGS_RESULT_FAILURE;
         default:
@@ -116,7 +138,7 @@ int main(int argc, char *argv[])
     if (r < 0)
         goto fail_controller;
 
-    r = remote_init(remote_dest);
+    r = remote_init(remote_dest, remote_output_format);
     if (r < 0)
         goto fail_remote;
 

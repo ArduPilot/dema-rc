@@ -3,7 +3,13 @@
 
 #pragma once
 
-int remote_init(const char *remote_dest);
+enum RemoteOutputFormat {
+    REMOTE_OUTPUT_AP_UDP_SIMPLE,
+    REMOTE_OUTPUT_AP_SITL,
+    _REMOTE_OUTPUT_UNKNOWN,
+};
+
+int remote_init(const char *remote_dest, enum RemoteOutputFormat format);
 void remote_shutdown(void);
 
-void remote_send_pkt(int val[], int count);
+void remote_send_pkt(const int val[], int count);
