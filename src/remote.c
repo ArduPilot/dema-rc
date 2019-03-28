@@ -135,6 +135,7 @@ int remote_init(const char *remote_dest, enum RemoteOutputFormat format)
             return -EINVAL;
         }
         *p = '\0';
+        addr = buf;
     }
 
     remote_ctx.sockaddr.sin_family = AF_INET;
