@@ -35,6 +35,19 @@ enum Axis {
     _AXIS_COUNT,
 };
 
+enum SC2Btn {
+    SC2BTN_SETTINGS,
+    SC2BTN_HOME,
+    SC2BTN_TAKEOFF,
+    SC2BTN_B,
+    SC2BTN_A,
+    SC2BTN_LEFT,
+    SC2BTN_RIGHT,
+    SC2BTN_RIGHT_WHEEL_LEFT,
+    SC2BTN_RIGHT_WHEEL_RIGHT,
+    _SC2BTN_COUNT,
+};
+
 struct evdev_abs_axis {
     int value;
     int min;
@@ -47,7 +60,10 @@ struct evdev_abs_axis {
 struct Controller {
     int fd;
 
-    int val[_AXIS_COUNT];
+    /* Axis + 1 channel for buttons */
+    int val[_AXIS_COUNT + 1];
+    unsigned int btn;
+
     struct {
         int range[_AXIS_COUNT][_INFO_ABS_COUNT];
     } info;
@@ -85,6 +101,37 @@ static int get_axis_from_evdev(unsigned long code)
     for (e = 0; e < _AXIS_COUNT; e++)
         if (evdev_axis_mapping[e] == (int)code)
             return e;
+
+    return -1;
+}
+
+static int get_btn_from_evdev(unsigned long code)
+{
+    switch (code) {
+    case BTN_TRIGGER:
+        return SC2BTN_SETTINGS;
+    case BTN_THUMB:
+        return SC2BTN_HOME;
+    case BTN_THUMB2:
+        return SC2BTN_TAKEOFF;
+    case BTN_TOP:
+        return SC2BTN_B;
+    case BTN_TOP2:
+        return SC2BTN_A;
+    case BTN_PINKIE:
+        return SC2BTN_RIGHT;
+    case BTN_BASE:
+        return SC2BTN_LEFT;
+    case BTN_BASE2:
+    case BTN_BASE3:
+    case BTN_BASE4:
+        /* ??? in theory we have, but I couldn't find */
+        return -1;
+    case BTN_BASE5:
+        return SC2BTN_RIGHT_WHEEL_LEFT;
+    case BTN_BASE6:
+        return SC2BTN_RIGHT_WHEEL_RIGHT;
+    };
 
     return -1;
 }
@@ -139,16 +186,53 @@ static int evdev_fill_info(int fd, struct Controller *c)
         return -EINVAL;
     }
 
+    /* Buttons are assumed to be non-pressed at start */
+
     log_debug("controller ok\n");
 
     return 0;
+}
+
+static void evdev_handle_abs(struct Controller *c, struct input_event *e)
+{
+    int axis = get_axis_from_evdev(e->code);
+
+    if (axis < 0) {
+        log_debug("ignoring axis %u\n", e->code);
+        return;
+    }
+
+    c->val[axis] = controller_abs_scale(c, axis, e->value);
+
+    log_debug("received event axis=%d val=%u\n", axis, c->val[axis]);
+}
+
+static void evdev_handle_key(struct Controller *c, struct input_event *e)
+{
+    int btn = get_btn_from_evdev(e->code);
+    int bit;
+
+    if (btn < 0) {
+        log_debug("ignoring btn %u\n", e->code);
+        return;
+    }
+
+    bit = 1 << btn;
+
+    /* TODO: latch value as needed */
+    if (e->value)
+        c->btn |= bit;
+    else
+        c->btn &= ~bit;
+
+    log_debug("received event btn=%d val=%u\n", btn, e->value);
 }
 
 static void evdev_handler(int fd, void *data, int ev_mask)
 {
     struct Controller *c = data;
     struct input_event events[64], *e;
-    int r, axis;
+    int r;
 
     if (!(ev_mask & EPOLLIN))
         return;
@@ -165,18 +249,14 @@ static void evdev_handler(int fd, void *data, int ev_mask)
     }
 
     for (e = events; e < events + r / sizeof(*events); e++) {
-        if (e->type != EV_ABS)
-            continue;
-
-        axis = get_axis_from_evdev(e->code);
-        if (axis < 0) {
-            log_debug("ignoring axis %u\n", e->code);
-            continue;
+        switch (e->type) {
+        case EV_ABS:
+            evdev_handle_abs(c, e);
+            break;
+        case EV_KEY:
+            evdev_handle_key(c, e);
+            break;
         }
-
-        c->val[axis] = controller_abs_scale(c, axis, e->value);
-
-        log_debug("received event axis=%d val=%u\n", axis, c->val[axis]);
     }
 }
 
@@ -184,13 +264,16 @@ static void remote_update_handler(int fd, void *data, int ev_mask)
 {
     struct Controller *c = data;
     uint64_t count = 0;
+    int button_ch = _AXIS_COUNT;
     int r;
 
     r = read(fd, &count, sizeof(count));
     if (r < 1 || count == 0)
         return;
 
-    remote_send_pkt(c->val, _AXIS_COUNT);
+    c->val[button_ch] = c->btn;
+
+    remote_send_pkt(c->val, _AXIS_COUNT + 1);
 }
 
 int controller_init(const char *device)
