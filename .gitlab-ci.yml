@@ -1,0 +1,10 @@
+image: fedora:30
+
+before_script:
+  - dnf upgrade -y
+  - dnf install -y meson ninja-build gcc
+
+build:
+  script:
+    - meson setup build
+    - ninja -C build
