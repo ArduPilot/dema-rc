@@ -64,12 +64,6 @@ struct Controller {
 
 static struct Controller controller;
 
-/* Currently we have a static map for SkyController 2 */
-static const int evdev_axis_mapping[] = {
-    [AXIS_ROLL] = ABS_Z, [AXIS_PITCH] = ABS_RX,    [AXIS_THROTTLE] = ABS_Y,
-    [AXIS_YAW] = ABS_X,  [AXIS_AUX_LEFT] = ABS_RY,
-};
-
 static uint16_t controller_abs_scale(struct Controller *c, enum Axis axis, int val)
 {
     int rmin = c->info.range[axis][INFO_ABS_MIN];
@@ -85,13 +79,21 @@ static uint16_t controller_abs_scale(struct Controller *c, enum Axis axis, int v
     return (uint16_t)val;
 }
 
+/* Currently we have a static map for SkyController 2 */
 static int get_axis_from_evdev(unsigned long code)
 {
-    int e;
-
-    for (e = 0; e < _AXIS_COUNT; e++)
-        if (evdev_axis_mapping[e] == (int)code)
-            return e;
+    switch (code) {
+    case ABS_Z:
+        return AXIS_ROLL;
+    case ABS_RX:
+        return AXIS_PITCH;
+    case ABS_Y:
+        return AXIS_THROTTLE;
+    case ABS_X:
+        return AXIS_YAW;
+    case ABS_RY:
+        return AXIS_AUX_LEFT;
+    }
 
     return -1;
 }
