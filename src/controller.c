@@ -48,15 +48,6 @@ enum SC2Btn {
     _SC2BTN_COUNT,
 };
 
-struct evdev_abs_axis {
-    int value;
-    int min;
-    int max;
-    int fuzz;
-    int flat;
-    int resolution;
-};
-
 struct Controller {
     int fd;
 
@@ -158,7 +149,7 @@ static int evdev_fill_info(int fd, struct Controller *c)
     memset(mask, 0, sizeof(mask));
     ioctl(fd, EVIOCGBIT(EV_ABS, KEY_MAX), mask);
     for (code = 0; code < EV_MAX && naxis < _AXIS_COUNT; code++) {
-        struct evdev_abs_axis abs;
+        struct input_absinfo abs;
         int axis;
 
         if (!test_bit(code, mask))
@@ -172,11 +163,11 @@ static int evdev_fill_info(int fd, struct Controller *c)
         ioctl(fd, EVIOCGABS(code), &abs);
 
         /* fill struct */
-        c->info.range[axis][INFO_ABS_MIN] = abs.min;
-        c->info.range[axis][INFO_ABS_MAX] = abs.max;
+        c->info.range[axis][INFO_ABS_MIN] = abs.minimum;
+        c->info.range[axis][INFO_ABS_MAX] = abs.maximum;
         c->val[axis] = abs.value;
 
-        log_debug("axis: %d min: %d max: %d\n", axis, abs.min, abs.max);
+        log_debug("axis: %d min: %d max: %d\n", axis, abs.minimum, abs.maximum);
 
         naxis++;
     }
