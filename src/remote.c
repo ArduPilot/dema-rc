@@ -36,7 +36,7 @@ struct _packed rc_udp_packet {
 
 /* -- sitl -- */
 
-#define SITL_NUM_CHANNELS 8
+#define SITL_NUM_CHANNELS 16
 
 /* All fields are Little Endian */
 struct _packed rc_udp_sitl_packet {
