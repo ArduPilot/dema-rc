@@ -51,9 +51,8 @@ enum SC2Btn {
 struct Controller {
     int fd;
 
-    /* Axis + 1 channel for buttons */
-    int val[_AXIS_COUNT + 1];
-    unsigned int btn;
+    /* Axis + buttons: 14 channels */
+    int val[_AXIS_COUNT + _SC2BTN_COUNT];
 
     struct {
         int range[_AXIS_COUNT][_INFO_ABS_COUNT];
@@ -180,6 +179,8 @@ static int evdev_fill_info(int fd, struct Controller *c)
     }
 
     /* Buttons are assumed to be non-pressed at start */
+    for (naxis = _AXIS_COUNT; naxis < _AXIS_COUNT + _SC2BTN_COUNT; naxis++)
+        c->val[naxis] = 1000;
 
     log_debug("controller ok\n");
 
@@ -203,20 +204,14 @@ static void evdev_handle_abs(struct Controller *c, struct input_event *e)
 static void evdev_handle_key(struct Controller *c, struct input_event *e)
 {
     int btn = get_btn_from_evdev(e->code);
-    int bit;
 
     if (btn < 0) {
         log_debug("ignoring btn %u\n", e->code);
         return;
     }
 
-    bit = 1 << btn;
-
-    /* TODO: latch value as needed */
-    if (e->value)
-        c->btn |= bit;
-    else
-        c->btn &= ~bit;
+    /* TODO: latch value as needed for x msec */
+    c->val[_AXIS_COUNT + btn] = e->value ? 2000 : 1000;
 
     log_debug("received event btn=%d val=%u\n", btn, e->value);
 }
@@ -257,16 +252,13 @@ static void remote_update_handler(int fd, void *data, int ev_mask)
 {
     struct Controller *c = data;
     uint64_t count = 0;
-    int button_ch = _AXIS_COUNT;
     int r;
 
     r = read(fd, &count, sizeof(count));
     if (r < 1 || count == 0)
         return;
 
-    c->val[button_ch] = c->btn;
-
-    remote_send_pkt(c->val, _AXIS_COUNT + 1);
+    remote_send_pkt(c->val, _AXIS_COUNT + _SC2BTN_COUNT);
 }
 
 int controller_init(const char *device)
