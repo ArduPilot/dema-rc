@@ -21,8 +21,8 @@
 
 /* -- start AP RCINPUT_UDP protocol -- */
 
-#define RCINPUT_UDP_NUM_CHANNELS 8
-#define RCINPUT_UDP_VERSION 2
+#define RCINPUT_UDP_NUM_CHANNELS 16
+#define RCINPUT_UDP_VERSION 3
 
 /* All fields are Little Endian */
 struct _packed rc_udp_packet {
