@@ -1,0 +1,39 @@
+FROM debian:buster as builder
+ARG BUILDROOT_VERSION=2019.08.2
+
+RUN apt update && apt install -y \
+	bc \
+	build-essential \
+	cpio \
+	file \
+	python \
+	rsync \
+	unzip \
+	wget \
+	curl \
+	&& rm -rf /var/lib/apt/lists/*
+
+COPY buildroot.config /buildroot.config
+
+# allow packages to configure as root
+ENV FORCE_UNSAFE_CONFIGURE 1
+RUN export FORCE_UNSAFE_CONFIGURE=1 && \
+	mkdir -p /buildroot \
+	&& curl -SL https://buildroot.org/downloads/buildroot-${BUILDROOT_VERSION}.tar.gz \
+	| tar --strip-components=1 -xzC /buildroot \
+	&& cd /buildroot \
+	&& cp /buildroot.config .config \
+	&& make olddefconfig \
+	&& make -j$(nproc) \
+	&& make -j1 sdk
+
+RUN mkdir -p /opt \
+	&& tar -xf /buildroot/output/images/arm-buildroot-linux-*sdk-buildroot.tar.gz -C /opt \
+	&& cd /opt/arm-buildroot-linux-* \
+	&& ./relocate-sdk.sh
+
+
+FROM debian:buster
+WORKDIR /root/
+COPY --from=builder /opt /opt
+ENTRYPOINT ["/bin/bash"]
