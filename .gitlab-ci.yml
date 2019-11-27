@@ -1,10 +1,42 @@
-image: fedora:31
+stages:
+  - container
+  - build
 
-before_script:
-  - dnf upgrade -y
-  - dnf install -y meson ninja-build gcc
+container-armv7hf:
+  image: docker:stable
+  stage: container
+  services:
+    - docker:dind
+  before_script:
+    - docker info
+    - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest -f ci/Dockerfile.debian ci/
+    - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
+  tags:
+    - docker
+  only:
+    refs:
+      - master
+      - /^ci([-/].*)?$/
+    changes:
+      - .gitlab-ci.yml
+      - .ci/Dockerfile.*
+      - .ci/buildroot.config
 
-build:
+build-native:
+  image: fedora:31
+  stage: build
+  before_script:
+    - dnf upgrade -y
+    - dnf install -y meson ninja-build gcc
   script:
     - meson setup build
+    - ninja -C build
+
+build-armv7hf:
+  image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
+  stage: build
+  script:
+    - meson setup --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf build
     - ninja -C build
