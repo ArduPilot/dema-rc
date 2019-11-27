@@ -34,6 +34,11 @@ RUN mkdir -p /opt \
 
 
 FROM debian:buster
-WORKDIR /root/
+RUN apt update && apt install -y \
+	gcc \
+	meson \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& mkdir -p /src
+WORKDIR /src
 COPY --from=builder /opt /opt
 ENTRYPOINT ["/bin/bash"]
