@@ -1,0 +1,3 @@
+[submodule "subprojects/c-ini"]
+	path = subprojects/c-ini
+	url = https://github.com/c-util/c-ini.git
