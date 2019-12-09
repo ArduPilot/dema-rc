@@ -99,7 +99,7 @@ static enum ArgsResult parse_args(int argc, char *argv[])
 
     /* mandatory arg: input device*/
     if (positional < 1) {
-        fprintf(stderr, "error: input device is required\n");
+        log_error("input device is required\n");
         help(stderr);
         return ARGS_RESULT_FAILURE;
     }
@@ -116,13 +116,14 @@ int main(int argc, char *argv[])
 {
     int r;
 
+    log_init();
+
     r = parse_args(argc, argv);
     if (r == ARGS_RESULT_EXIT)
         return 0;
     if (r == ARGS_RESULT_FAILURE)
         goto fail;
 
-    log_init();
     if (verbose)
         log_set_max_level(LOG_DEBUG);
 
