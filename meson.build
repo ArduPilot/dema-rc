@@ -102,4 +102,8 @@ config_h = configure_file(
     configuration: conf)
 add_project_arguments('-include', 'config.h', language : 'c')
 
+sub_cini = subproject('c-ini', version: '>=1')
+
+dep_cini = sub_cini.get_variable('libcini_dep')
+
 subdir('src')

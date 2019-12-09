@@ -13,5 +13,8 @@ exe_dema_rc = executable(
       'signal.c',
       'util.c',
     ],
+    dependencies: [
+      dep_cini,
+    ],
     install: true
 )
