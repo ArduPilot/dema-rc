@@ -93,9 +93,13 @@ foreach arg : possible_link_flags
         endif
 endforeach
 
+sysconfdir = get_option('sysconfdir')
+pkgsysconfdir = join_paths(sysconfdir, 'dema-rc')
+
 conf.set('_GNU_SOURCE', true)
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf.set_quoted('PACKAGE', meson.project_name())
+conf.set_quoted('PKGSYSCONFDIR', pkgsysconfdir)
 
 config_h = configure_file(
     output: 'config.h',
