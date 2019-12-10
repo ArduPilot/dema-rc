@@ -1,3 +1,6 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 stages:
   - container
   - build
@@ -31,6 +34,9 @@ build-native:
     - dnf upgrade -y
     - dnf install -y meson ninja-build gcc
   script:
+    - meson wrap promote subprojects/c-ini/subprojects/c-utf8
+    - meson wrap promote subprojects/c-ini/subprojects/c-list
+    - meson wrap promote subprojects/c-ini/subprojects/c-rbtree
     - meson setup build
     - ninja -C build
 
@@ -38,5 +44,8 @@ build-armv7hf:
   image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
   stage: build
   script:
+    - meson wrap promote subprojects/c-ini/subprojects/c-utf8
+    - meson wrap promote subprojects/c-ini/subprojects/c-list
+    - meson wrap promote subprojects/c-ini/subprojects/c-rbtree
     - meson setup --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf build
     - ninja -C build

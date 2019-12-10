@@ -25,6 +25,10 @@ blocks:
           - sudo apt --yes install python3 python3-pip ninja-build
           - sudo pip3 install meson
           - checkout
+          - git submodule update --init --recursive
+          - meson wrap promote subprojects/c-ini/subprojects/c-utf8
+          - meson wrap promote subprojects/c-ini/subprojects/c-list
+          - meson wrap promote subprojects/c-ini/subprojects/c-rbtree
 
       epilogue:
         commands:
