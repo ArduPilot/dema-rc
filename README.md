@@ -1,3 +1,5 @@
+![Gitlab pipeline status (branch)](https://gitlab.com/lucas.de.marchi/dema-rc/badges/master/pipeline.svg)
+
 dema-rc
 =======
 
