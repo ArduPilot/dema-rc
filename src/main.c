@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     if (r < 0)
         goto fail_signal;
 
-    r = controller_init(device);
+    r = controller_init(device, config_domain);
     if (r < 0)
         goto fail_controller;
 

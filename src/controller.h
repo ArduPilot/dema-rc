@@ -3,5 +3,7 @@
 
 #pragma once
 
-int controller_init(const char *device);
+typedef struct CIniDomain CIniDomain;
+
+int controller_init(const char *device, CIniDomain *config);
 void controller_shutdown(void);

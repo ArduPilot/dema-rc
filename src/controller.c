@@ -13,6 +13,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <c-ini.h>
+#include <c-stdaux.h>
+
 #include "event_loop.h"
 #include "log.h"
 #include "remote.h"
@@ -140,6 +143,7 @@ static int evdev_fill_info(int fd, struct Controller *c)
     unsigned long code;
     unsigned int naxis = 0;
 
+    /* We need at least EV_ABS events in @fd */
     memset(mask, 0, sizeof(mask));
     ioctl(fd, EVIOCGBIT(0, EV_MAX), mask);
     if (!test_bit(EV_ABS, mask)) {
@@ -261,7 +265,7 @@ static void remote_update_handler(int fd, void *data, int ev_mask)
     remote_send_pkt(c->val, _AXIS_COUNT + _SC2BTN_COUNT);
 }
 
-int controller_init(const char *device)
+int controller_init(const char *device, CIniDomain *config)
 {
     int fd, r;
 
