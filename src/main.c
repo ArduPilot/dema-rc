@@ -18,6 +18,7 @@
 #include "event_loop.h"
 #include "log.h"
 #include "remote.h"
+#include "util.h"
 
 enum ArgsResult {
     /* fail to parse options */
@@ -130,9 +131,9 @@ static void config_file_parse_general_group(CIniDomain *domain)
 
         log_debug("conf: General.%s = %s\n", key, value);
 
-        if (!device && strncasecmp(key, "InputDevice", keylen))
+        if (!device && strncaseeq(key, "InputDevice", keylen))
             device = value;
-        else if (!remote_dest && strncasecmp(key, "Destination", keylen))
+        else if (!remote_dest && strncaseeq(key, "Destination", keylen))
             remote_dest = value;
     }
 }
