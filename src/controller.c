@@ -53,6 +53,7 @@ enum SC2Btn {
 
 struct Controller {
     int fd;
+    bool grab_device;
 
     /* Axis + buttons: 14 channels */
     int val[_AXIS_COUNT + _SC2BTN_COUNT];
@@ -265,11 +266,38 @@ static void remote_update_handler(int fd, void *data, int ev_mask)
     remote_send_pkt(c->val, _AXIS_COUNT + _SC2BTN_COUNT);
 }
 
+static void parse_config(CIniDomain *config)
+{
+    CIniGroup *group;
+    CIniEntry *entry;
+    const char *value;
+    int b;
+
+    group = c_ini_domain_find(config, "General", -1);
+    if (!group)
+        return;
+
+    entry = c_ini_group_find(group, "GrabDevice", -1);
+    if (!entry)
+        return;
+
+    value = c_ini_entry_get_value(entry, NULL);
+    b = parse_boolean(value);
+    if (b < 0) {
+        log_warning("Invalid value General.GrabDevice=%s\n", value);
+        return;
+    }
+
+    controller.grab_device = b;
+}
+
 int controller_init(const char *device, CIniDomain *config)
 {
     int fd, r;
 
     controller.fd = -1;
+
+    parse_config(config);
 
     fd = open(device, O_RDONLY | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0) {
@@ -277,7 +305,7 @@ int controller_init(const char *device, CIniDomain *config)
         return -errno;
     }
 
-    r = evdev_grab_device(fd);
+    r = controller.grab_device && evdev_grab_device(fd);
     if (r != 0)
         log_warning("Could not grab device %s: no exclusive access\n", device);
 
