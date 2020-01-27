@@ -6,6 +6,8 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
+#include "string.h"
+
 #define DIV_ROUND_UP(n, d) (((n) + (d)-1) / (d))
 
 #define BITS_PER_BYTE 8
@@ -63,5 +65,10 @@ typedef uint64_t nsec_t;
 #define NSEC_PER_USEC ((nsec_t) 1000ULL)
 
 usec_t now_usec(void);
+
+#define streq(a,b) (strcmp((a),(b)) == 0)
+#define strneq(a, b, n) (strncmp((a), (b), (n)) == 0)
+#define strcaseeq(a,b) (strcasecmp((a),(b)) == 0)
+#define strncaseeq(a, b, n) (strncasecmp((a), (b), (n)) == 0)
 
 /* clang-format on */
