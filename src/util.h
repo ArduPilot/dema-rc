@@ -71,4 +71,6 @@ usec_t now_usec(void);
 #define strcaseeq(a,b) (strcasecmp((a),(b)) == 0)
 #define strncaseeq(a, b, n) (strncasecmp((a), (b), (n)) == 0)
 
+int parse_boolean(const char *v);
+
 /* clang-format on */

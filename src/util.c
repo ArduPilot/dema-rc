@@ -47,3 +47,18 @@ usec_t now_usec(void)
 
     return ts_usec(&ts);
 }
+
+int parse_boolean(const char *v)
+{
+    if (!v)
+        return -EINVAL;
+
+    if (streq(v, "1") || strcaseeq(v, "yes") || strcaseeq(v, "y") || strcaseeq(v, "true")
+        || strcaseeq(v, "t") || strcaseeq(v, "on"))
+        return 1;
+    else if (streq(v, "0") || strcaseeq(v, "no") || strcaseeq(v, "n") || strcaseeq(v, "false")
+             || strcaseeq(v, "f") || strcaseeq(v, "off"))
+        return 0;
+
+    return -EINVAL;
+}
