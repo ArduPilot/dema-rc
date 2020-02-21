@@ -1,0 +1,96 @@
+#!/bin/sh
+
+ssid=$(cat /data/ftp/internal_000/ssid.txt)
+fifo="/tmp/run/demarc-cm"
+monitor_pid=0
+
+notify_searching()
+{
+    mpp_bb_cli blink 3 0 1000 50
+}
+
+notify_connecting()
+{
+    mpp_bb_cli blink 7 3  200 20
+}
+
+notify_connected()
+{
+    mpp_bb_cli on 3
+}
+
+wifi_connect()
+{
+    while true; do
+        ready=$(wifid-cli status 2>&1| grep  -e "ready *: 1")
+        if [ ! -z "$ready" ]; then
+            break
+        fi
+
+        notify_searching
+        wifid-cli scan
+        sleep 3
+
+        notify_connecting
+        wifid-cli connect "$ssid"
+    done
+
+    notify_connected
+}
+
+# Make sure mppd is not messing with the network
+pstop mppd
+pstop sensorsd-mpp
+
+wifi_monitor()
+{
+    local connected=0
+
+    rm -f $fifo
+    mkfifo $fifo
+
+    wifid-cli monitor 2>$fifo &
+    monitor_pid=$!
+    echo $monitor_pid
+
+    while read line; do
+        if [ "$line" == "state:    : connected" ]; then
+            notify_connected
+            connected=1
+        elif [ "$line" == "state:    : disconnected" ]; then
+            notify_searching
+            connected=0
+        elif [ "$line" == "network changed: Connected" ]; then
+            notify_connected
+            connected=1
+        elif [ "$line" == "network changed: Connection Failure" ]; then
+            notify_searching
+            connected=0
+        elif [ "$line" == "network changed: Disconnected" ]; then
+            notify_searching
+            connected=0
+        else
+            continue
+        fi
+
+        if [ $connected -eq 0 ]; then
+            wifid-cli connect "$ssid"
+        fi
+    done < $fifo
+}
+
+cleanup()
+{
+    ulogger -s -p I -t demarc 'Stop demarc-cm'
+
+    [ $monitor_pid -ne 0 ] && kill $monitor_pid
+    rm -f /tmp/run/demarc-cm
+    notify_searching
+    exit 0
+}
+
+trap cleanup INT TERM
+
+ulogger -s -p -I -t demarc "Start demarc-cm"
+
+wifi_monitor
