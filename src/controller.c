@@ -171,7 +171,7 @@ static int evdev_fill_info(int fd, struct Controller *c)
         /* fill struct */
         c->info.range[axis][INFO_ABS_MIN] = abs.minimum;
         c->info.range[axis][INFO_ABS_MAX] = abs.maximum;
-        c->val[axis] = abs.value;
+        c->val[axis] = controller_abs_scale(c, axis, abs.value);
 
         log_debug("axis: %d min: %d max: %d\n", axis, abs.minimum, abs.maximum);
 
