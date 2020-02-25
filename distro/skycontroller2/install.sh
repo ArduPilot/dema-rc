@@ -2,6 +2,9 @@
 
 set -e
 
+SCRIPT_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
+
+cd $SCRIPT_DIR
 adb shell mkdir -p /data/ftp/internal_000/ardupilot/bin/
 adb push ./data/ftp/internal_000/ardupilot/bin/demarc-btn /data/ftp/internal_000/ardupilot/bin/
 adb push ./data/ftp/internal_000/ardupilot/bin/demarc-cm /data/ftp/internal_000/ardupilot/bin/
