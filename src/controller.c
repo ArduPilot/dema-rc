@@ -183,7 +183,7 @@ static int evdev_fill_info(int fd, struct Controller *c)
         return -EINVAL;
     }
 
-    /* Buttons are assumed to be non-pressed at start */
+    /* Buttons are assumed to be low at start */
     for (naxis = _AXIS_COUNT; naxis < _AXIS_COUNT + _SC2BTN_COUNT; naxis++)
         c->val[naxis] = 1000;
 
@@ -215,8 +215,12 @@ static void evdev_handle_key(struct Controller *c, struct input_event *e)
         return;
     }
 
-    /* TODO: latch value as needed for x msec */
-    c->val[_AXIS_COUNT + btn] = e->value ? 2000 : 1000;
+    /* Ignore button release */
+    if (!e->value)
+        return;
+
+    /* Toggle button according with the last value */
+    c->val[_AXIS_COUNT + btn] = c->val[_AXIS_COUNT + btn] == 1000 ? 2000 : 1000;
 
     log_debug("received event btn=%d val=%u\n", btn, e->value);
 }
