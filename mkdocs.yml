@@ -1,0 +1,46 @@
+site_name: dema-rc
+site_description: 'Linux Drone Remote Controller'
+site_author: 'Lucas De Marchi'
+site_url: 'https://lucasdemarchi.github.io/dema-rc/'
+
+# Repository
+repo_name: 'lucasdemarchi/dema-rc'
+repo_url: 'https://github.com/lucasdemarchi/dema-rc'
+edit_uri: ''
+
+nav:
+  - 'index.md'
+  - 'getting-started.md'
+
+# Copyright
+copyright: 'Copyright &copy; 2019 - 2020 Lucas De Marchi'
+
+theme:
+  name: material
+  palette:
+    primary: 'teal'
+    accent: 'teal'
+  logo: 'assets/images/demarc-logo.png'
+  favicon: 'assets/images/videogame_asset.ico'
+  custom_dir: 'docs/theme'
+
+extra:
+  social:
+    - type: 'github'
+      link: 'https://github.com/lucasdemarchi'
+    - type: 'twitter'
+      link: 'https://twitter.com/realdemarchi'
+    - type: 'rss'
+      link: 'https://politreco.com'
+
+markdown_extensions:
+  - admonition
+  - pymdownx.magiclink
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
