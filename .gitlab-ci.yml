@@ -17,8 +17,10 @@ container-armv7hf:
     - docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest -f ci/Dockerfile.debian ci/
     - docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
     - mkdir -p artifacts
-    - docker run --rm ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest \
-      tar -C /opt -cJf - arm-buildroot-linux-gnueabihf_sdk-buildroot | cat > artifacts/toolchain.tar.xz
+    - docker run --rm
+        ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
+        tar -C /opt -cJf - arm-buildroot-linux-gnueabihf_sdk-buildroot |
+            cat > artifacts/toolchain.tar.xz
   artifacts:
     name: toolchain-$CI_COMMIT_REF_NAME
     paths:
