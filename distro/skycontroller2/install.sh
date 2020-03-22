@@ -3,13 +3,16 @@
 set -e
 
 SCRIPT_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
+PREFIX=/data/ftp/internal_000
+BINDIR=${PREFIX}/usr/bin
+SYSCONFDIR=/etc
 
 cd $SCRIPT_DIR
-adb shell mkdir -p /data/ftp/internal_000/ardupilot/bin/
-adb push ./data/ftp/internal_000/ardupilot/bin/demarc-btn /data/ftp/internal_000/ardupilot/bin/
-adb push ./data/ftp/internal_000/ardupilot/bin/demarc-cm /data/ftp/internal_000/ardupilot/bin/
-adb shell chmod +x /data/ftp/internal_000/ardupilot/bin/demarc-btn
-adb shell chmod +x /data/ftp/internal_000/ardupilot/bin/demarc-cm
+adb shell mkdir -p $BINDIR
+adb push ./usr/bin/demarc-btn $BINDIR
+adb push ./usr/bin/demarc-cm $BINDIR
+adb shell chmod +x $BINDIR/demarc-btn
+adb shell chmod +x $bindir/demarc-cm
 
 adb shell mount -o remount,rw /
 
