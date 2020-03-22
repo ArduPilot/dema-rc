@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 TOOLCHAIN_PATH=$1
 TRIPLET=$2
 BINARY=$3
