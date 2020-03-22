@@ -5,6 +5,7 @@ set -e
 TOOLCHAIN_PATH=$1
 TRIPLET=$2
 BINARY=$3
+QEMU=$4
 
 # Get linker from ELF header
 ld=$(readelf --program-headers $BINARY | sed -n 's/ *\[Requesting program interpreter: \(.*\)]/\1/p')
@@ -13,7 +14,7 @@ ld=$(readelf --program-headers $BINARY | sed -n 's/ *\[Requesting program interp
 ld_toolchain=$(find $TOOLCHAIN_PATH/$TRIPLET -name "$(basename $ld)" -print -quit)
 
 # Run linker with --list to get a list of the libraries
-out=$($ld_toolchain \
+out=$($QEMU $ld_toolchain \
 	--library-path $TOOLCHAIN_PATH/$TRIPLET/sysroot/usr/lib:$TOOLCHAIN_PATH/$TRIPLET/sysroot/lib \
 	--inhibit-cache \
 	--list $BINARY)
