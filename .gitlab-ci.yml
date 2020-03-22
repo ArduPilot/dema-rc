@@ -81,9 +81,6 @@ pkg-sk2-deps:
   stage: package
   dependencies:
     - build-armv7hf
-  before_script:
-    - apt-get update --yes
-    - apt-get install --yes qemu-user-static
   script:
     - ./tools/bundler.sh
           /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot
