@@ -3,18 +3,28 @@
 set -e
 
 QEMU=
-OUTPUT=deps.tar
+DIR=0
+OUTPUT=
 
 args=0
-while getopts "q:o:" o; do
+while getopts "q:o:d" o; do
     case "${o}" in
         q) QEMU=${OPTARG}; args=$[$args + 2] ;;
         o) OUTPUT=${OPTARG}; args=$[$args + 2] ;;
+	d) DIR=1 args=$[$args + 1] ;;
         \?) exit 1;;
     esac
 done
 shift $args
 
+if [ -z "$OUTPUT" ]; then
+	if [ $DIR -eq 1 ]; then
+		OUTPUT=deps
+	else
+		OUTPUT=deps.tar
+	fi
+
+fi
 TOOLCHAIN_PATH=$1
 TRIPLET=$2
 BINARY=$3
@@ -38,10 +48,14 @@ while read x xx d addr; do
 	install -D -T $d $bundler/$s
 done <<<$out
 
-if [ ! -f "$OUTPUT" ]; then
-	tar -cf "$OUTPUT" --files-from=/dev/null
+if [ $DIR -eq 1 ]; then
+	mkdir -p $OUTPUT
+	cp -a "$bundler/." "$OUTPUT/"
+else
+	if [ ! -f "$OUTPUT" ]; then
+		tar -cf "$OUTPUT" --files-from=/dev/null
+	fi
+	tar -C $bundler -rf "$OUTPUT" .
 fi
-
-tar -C $bundler -rf "$OUTPUT" .
 
 rm -rf $bundler
