@@ -2,7 +2,7 @@
 
 input_dev_settings="/dev/input/event0"
 rc="mpp"
-fifo="/tmp/run/demarc-btn"
+fifo="/tmp/run/dema-rc-btn"
 evtest_pid=0
 
 mpp_stop()
@@ -19,14 +19,14 @@ mpp_start()
 
 demarc_stop()
 {
-    pstop demarc
-    pstop demarc-cm
+    pstop dema-rc
+    pstop dema-rc-cm
 }
 
 demarc_start()
 {
-    pstart demarc-cm
-    pstart demarc
+    pstart dema-rc-cm
+    pstart dema-rc
 }
 
 btn_monitor()
@@ -47,7 +47,7 @@ BEGIN { t0=0 }
     t0 = t;
 }' $fifo
 
-        ulogger -s -p -I -t demarc "Toggle RC stack (current=$rc)"
+        ulogger -s -p -I -t dema-rc "Toggle RC stack (current=$rc)"
 
         if [ $rc == "mpp" ]; then
             mpp_stop
@@ -71,7 +71,7 @@ btn_monitor_old()
 
     while read line; do
         if [ "$line" != "${line%type 1 (EV_KEY), code 288 (BTN_TRIGGER), value 0}" ]; then
-            ulogger -s -p -I -t demarc "Toggle RC stack (current=$rc)"
+            ulogger -s -p -I -t dema-rc "Toggle RC stack (current=$rc)"
         else
             continue
         fi
@@ -89,15 +89,15 @@ btn_monitor_old()
 
 cleanup()
 {
-    ulogger -s -p I -t demarc 'Stop demarc-btn'
+    ulogger -s -p I -t dema-rc 'Stop dema-rc-btn'
 
     [ $evtest_pid -ne 0 ] && kill $evtest_pid
-    rm -f /tmp/run/demarc-btn
+    rm -f /tmp/run/dema-rc-btn
     exit 0
 }
 
 trap cleanup INT TERM
 
-ulogger -s -p -I -t demarc "Start demarc-btn"
+ulogger -s -p -I -t dema-rc "Start dema-rc-btn"
 
 btn_monitor_old

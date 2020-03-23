@@ -1,14 +1,14 @@
-service demarc-btn /data/ftp/internal_000/ardupilot/bin/demarc-btn
+service dema-rc-btn /data/ftp/internal_000/dema-rc/usr/bin/dema-rc-btn
 	class main
 	user root
 
-service demarc-cm /data/ftp/internal_000/ardupilot/bin/demarc-cm
+service dema-rc-cm /data/ftp/internal_000/dema-rc/usr/bin/dema-rc-cm
 	class main
 	user root
 	disabled
 
-service demarc /data/ftp/internal_000/ardupilot/bin/dema-rc
+service dema-rc /data/ftp/internal_000/dema-rc/usr/bin/dema-rc
 	class main
 	user root
-	setenv LD_LIBRARY_PATH /data/ftp/internal_000/ardupilot/lib
+	setenv LD_LIBRARY_PATH /data/ftp/internal_000/dema-rc/usr/lib
 	disabled
