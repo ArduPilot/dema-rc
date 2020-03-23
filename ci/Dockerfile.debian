@@ -10,8 +10,7 @@ RUN apt update && apt install -y \
 	rsync \
 	unzip \
 	wget \
-	curl \
-	qemu-user-static \
+	curl
 	&& rm -rf /var/lib/apt/lists/*
 
 COPY buildroot.config /buildroot.config
@@ -38,6 +37,7 @@ FROM debian:buster
 RUN apt update && apt install -y \
 	gcc \
 	meson \
+	qemu-user-static \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& mkdir -p /src
 WORKDIR /src
