@@ -8,6 +8,7 @@ project(
         license: 'LGPLv2+',
         default_options: [
                 'c_std=gnu11',
+                'sysconfdir=/etc',
         ],
 )
 project_description = 'Linux Drone Remote Controller'
