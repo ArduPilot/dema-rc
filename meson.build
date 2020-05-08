@@ -10,7 +10,7 @@ project(
                 'c_std=gnu11',
                 'sysconfdir=/etc',
         ],
-        meson_version : '>= 0.53',
+        meson_version : '>= 0.49',
 )
 project_description = 'Linux Drone Remote Controller'
 
@@ -119,12 +119,18 @@ sub_cini = subproject('c-ini', version: '>=1')
 
 dep_cini = sub_cini.get_variable('libcini_dep')
 
-summary({
-  'prefix'         : prefixdir,
-  'sysconfdir'     : sysconfdir,
-  'pkgsysconfdir'  : pkgsysconfdir,
-  'libdir'         : libdir,
-  'bindir'         : bindir,
-}, section : 'Directories')
-
 subdir('src')
+
+# summary - replace with summary() once we can use meson >= 53
+status = [
+        '',
+        '@0@ @1@'.format(meson.project_name(), meson.project_version()),
+
+        'prefix directory:                  @0@'.format(prefixdir),
+        'bin directory:                     @0@'.format(bindir),
+        'lib directory:                     @0@'.format(libdir),
+        'sysconf directory:                 @0@'.format(sysconfdir),
+        'pkgsysconf directory:              @0@'.format(pkgsysconfdir),
+        ''
+]
+message('\n         '.join(status))
