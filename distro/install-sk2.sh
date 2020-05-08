@@ -44,8 +44,8 @@ assert_sk2() {
 	[ "$version" == "ro.parrot.build.version=1.0.9" ] ||
 		fatal "SkyController 2 not running latest firmware (1.0.9)"
 
-	df_system=$(adb shell 'df  | grep -w / | awk "{ print \$3 }"')
-	df_data=$(adb shell  'df  | grep -w /data | awk "{ print \$3 }"')
+	df_system=$(adb shell 'df -P -k | grep -w / | awk "{ print \$4 }"')
+	df_data=$(adb shell  'df -P -k | grep -w /data | awk "{ print \$4 }"')
 }
 
 register_cleanup() {
