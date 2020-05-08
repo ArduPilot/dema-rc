@@ -10,6 +10,7 @@ project(
                 'c_std=gnu11',
                 'sysconfdir=/etc',
         ],
+        meson_version : '>= 0.53',
 )
 project_description = 'Linux Drone Remote Controller'
 
@@ -94,8 +95,15 @@ foreach arg : possible_link_flags
         endif
 endforeach
 
-sysconfdir = get_option('sysconfdir')
-pkgsysconfdir = join_paths(sysconfdir, 'dema-rc')
+# make sure everything is absolute
+prefixdir = get_option('prefix')
+if not prefixdir.startswith('/')
+    error('Prefix is not absolute: "@0@"'.format(prefixdir))
+endif
+bindir = prefixdir / get_option('bindir')
+libdir = prefixdir / get_option('libdir')
+sysconfdir = prefixdir / get_option('sysconfdir')
+pkgsysconfdir = prefixdir / sysconfdir / 'dema-rc'
 
 conf.set('_GNU_SOURCE', true)
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
@@ -110,5 +118,13 @@ add_project_arguments('-include', 'config.h', language : 'c')
 sub_cini = subproject('c-ini', version: '>=1')
 
 dep_cini = sub_cini.get_variable('libcini_dep')
+
+summary({
+  'prefix'         : prefixdir,
+  'sysconfdir'     : sysconfdir,
+  'pkgsysconfdir'  : pkgsysconfdir,
+  'libdir'         : libdir,
+  'bindir'         : bindir,
+}, section : 'Directories')
 
 subdir('src')
