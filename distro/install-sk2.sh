@@ -83,13 +83,12 @@ relocate_bundle() {
 		--transform="s@./usr@.$PREFIX@" \
 		--transform="s@./lib@.$LIBDIR@"
 
-	# Change ld interpreter to be inside LIBDIR
+	# Change ld interpreter to be inside LIBDIR, if present
 	BINARY=${DESTDIR}${PREFIX}/bin/dema-rc
 	ld=$(readelf --program-headers $BINARY | sed -n 's/ *\[Requesting program interpreter: \(.*\)]/\1/p')
-	patchelf --set-interpreter ${PREFIX}${ld} "$BINARY"
-
-	# Skip libc as we can use the one from SkyController 2
-	rm ${DESTDIR}${LIBDIR}/libc.*
+	if [ -x ${DESTDIR}${PREFIX}${ld} ]; then
+		patchelf --set-interpreter ${PREFIX}${ld} "$BINARY"
+	fi
 }
 
 calculate_space() {

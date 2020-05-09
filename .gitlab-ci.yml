@@ -83,6 +83,7 @@ pkg-sk2-deps:
     - build-armv7hf
   script:
     - ./tools/bundler.sh
+          -x 'ld-*.so' -x libc.so
           -q qemu-arm-static
           -o deps.tar
           /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot
