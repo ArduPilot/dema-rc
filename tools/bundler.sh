@@ -5,13 +5,15 @@ set -e
 QEMU=
 DIR=0
 OUTPUT=
+EXCLUDE=()
 
 args=0
-while getopts "q:o:d" o; do
+while getopts "x:q:o:d" o; do
     case "${o}" in
         q) QEMU=${OPTARG}; args=$[$args + 2] ;;
         o) OUTPUT=${OPTARG}; args=$[$args + 2] ;;
-	d) DIR=1 args=$[$args + 1] ;;
+	d) DIR=1; args=$[$args + 1] ;;
+	x) EXCLUDE+=( ${OPTARG} ); args=$[$args + 2] ;;
         \?) exit 1;;
     esac
 done
@@ -29,6 +31,16 @@ TOOLCHAIN_PATH=$1
 TRIPLET=$2
 BINARY=$3
 
+function is_excluded() {
+	local f
+
+	for f in "${EXCLUDE[@]}"; do
+		[[ $1 == *$f* ]] && return 0
+	done
+
+	return 1
+}
+
 # Get linker from ELF header
 ld=$(readelf --program-headers $BINARY | sed -n 's/ *\[Requesting program interpreter: \(.*\)]/\1/p')
 
@@ -45,6 +57,7 @@ bundler=$(mktemp -d --tmpdir bundler.XXXXXX)
 
 while read x xx d addr; do
 	s=${d#$TOOLCHAIN_PATH/$TRIPLET/sysroot/}
+	is_excluded $s && continue
 	install -D -T $d $bundler/$s
 done <<<$out
 
