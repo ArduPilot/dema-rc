@@ -29,6 +29,8 @@
 
 set -e
 
+PREFIX="/data/ftp/internal_000/dema-rc/usr"
+
 fatal() {
 	echo "$@" > /dev/stderr
 	exit 1
@@ -75,7 +77,6 @@ parse_args() {
 
 relocate_bundle() {
 	DESTDIR=$(mktemp -d --tmpdir demarc-install.XXXXXXXX)
-	PREFIX="/data/ftp/internal_000/dema-rc/usr"
 	LIBDIR="$PREFIX/lib"
 	BINDIR="$PREFIX/bin"
 
@@ -140,6 +141,9 @@ echo
 
 echo "Mounting / as rw..."
 mount -o remount,rw /
+
+echo "Removing previous installation under $PREFIX"
+rm -rf $PREFIX
 EOF
 
 adb push $DESTDIR/. /
