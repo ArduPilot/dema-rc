@@ -152,7 +152,7 @@ adb push $DESTDIR/. /
 # we don't need this
 adb shell <<EOF
 echo
-echo "Fixing up file permitions..."
+echo "Fixing up file permissions..."
 chmod 0640 /etc/boxinit.d/99-demarc.rc
 chmod 0755 /data/ftp/internal_000/dema-rc/usr/bin/dema-rc
 chmod 0755 /data/ftp/internal_000/dema-rc/usr/bin/dema-rc-cm
