@@ -19,10 +19,6 @@ notify_connected()
     mpp_bb_cli on 3
 }
 
-# Make sure mppd is not messing with the network
-pstop mppd
-pstop sensorsd-mpp
-
 wifi_monitor()
 {
     rm -f $fifo
@@ -54,6 +50,10 @@ cleanup()
     notify_searching
     exit 0
 }
+
+# Make sure mppd is not messing with the network
+pstop mppd
+pstop sensorsd-mpp
 
 trap cleanup INT TERM
 
