@@ -25,8 +25,6 @@ pstop sensorsd-mpp
 
 wifi_monitor()
 {
-    local connected=0
-
     rm -f $fifo
     mkfifo $fifo
 
@@ -34,27 +32,14 @@ wifi_monitor()
     monitor_pid=$!
     echo $monitor_pid
 
-    while read line; do
-        if [ "$line" == "state:    : connected" ]; then
+    while read -r line; do
+        if [ "$line" = "state:    : connected" ] ||
+           [ "$line" = "network changed: Connected" ]; then
             notify_connected
-            connected=1
-        elif [ "$line" == "state:    : disconnected" ]; then
+        elif [ "$line" = "state:    : disconnected" ] ||
+             [ "$line" = "network changed: Connection Failure" ] ||
+             [ "$line" = "network changed: Disconnected" ]; then
             notify_searching
-            connected=0
-        elif [ "$line" == "network changed: Connected" ]; then
-            notify_connected
-            connected=1
-        elif [ "$line" == "network changed: Connection Failure" ]; then
-            notify_searching
-            connected=0
-        elif [ "$line" == "network changed: Disconnected" ]; then
-            notify_searching
-            connected=0
-        else
-            continue
-        fi
-
-        if [ $connected -eq 0 ]; then
             wifid-cli connect "$ssid"
         fi
     done < $fifo
