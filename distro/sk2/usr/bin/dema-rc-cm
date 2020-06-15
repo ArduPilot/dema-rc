@@ -19,25 +19,6 @@ notify_connected()
     mpp_bb_cli on 3
 }
 
-wifi_connect()
-{
-    while true; do
-        ready=$(wifid-cli status 2>&1| grep  -e "ready *: 1")
-        if [ ! -z "$ready" ]; then
-            break
-        fi
-
-        notify_searching
-        wifid-cli scan
-        sleep 3
-
-        notify_connecting
-        wifid-cli connect "$ssid"
-    done
-
-    notify_connected
-}
-
 # Make sure mppd is not messing with the network
 pstop mppd
 pstop sensorsd-mpp
