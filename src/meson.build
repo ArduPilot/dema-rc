@@ -18,3 +18,12 @@ exe_dema_rc = executable(
     ],
     install: true
 )
+
+bundle_tgt = custom_target('bundle',
+    command: [ '../tools/bundle-sc2.sh', '@OUTPUT@' ],
+    output:  'dema-rc-bundle.tar.gz',
+    input:   exe_dema_rc)
+# meson >= 0.52
+# alias_target('bundle', bundle_tgt)
+run_target('bundle',
+    command: ['echo', 'Creating bundle...'], depends: bundle_tgt)
