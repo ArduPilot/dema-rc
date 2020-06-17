@@ -77,18 +77,30 @@ Configure dema-rc:
 
 ```console
 $ meson setup \
-    --prefix=/usr \
     --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf
 ```
 
 Build:
 ```console
-ninja -C build
+$ ninja -C build
 ```
 
-Install/deploy:
+Create bundle to install on SkyControler2:
 ```console
-adb push build/src/dema-rc /data/ftp/internal_000/dema-rc/usr/bin/dema-rc
+$ ninja -C build bundle
+```
+
+Install on SkyController2:
+```console
+$ export ANDROID_SERIAL=192.168.53.1:9050
+$ ./distro/install-sk2.sh build/src/dema-rc-bundle.tar.gz
+```
+
+When developing on dema-rc and only modifying the main program, you can skip
+the bundle creation and push only that binary:
+
+```console
+$ adb push build/src/dema-rc /data/ftp/internal_000/dema-rc/usr/bin/dema-rc
 ```
 
 Note that the command above installs only the main binary. Check in the install
