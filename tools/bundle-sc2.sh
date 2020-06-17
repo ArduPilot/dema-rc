@@ -62,8 +62,8 @@ $SCRIPT_DIR/bundler.sh \
 	"$TOOLCHAIN" \
 	"$instdir/usr/bin/dema-rc"
 
-# overlay distro/sk2/
-cp -a $SCRIPT_DIR/../distro/sk2/. "$instdir"
+# overlay distro/sc2/
+cp -a $SCRIPT_DIR/../distro/sc2/. "$instdir"
 
 # relocate binaries and libs to side load
 relocate_bundle

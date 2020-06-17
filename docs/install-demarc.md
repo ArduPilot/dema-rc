@@ -18,11 +18,11 @@ Currently there is no released version, so just use latest master branch. Binari
 are available directly from CI:
 
 ```console
-$ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sk2
-$ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/distro/install-sk2.sh
-$ chmod +x install-sk2.sh
+$ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sc2
+$ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/distro/install-sc2.sh
+$ chmod +x install-sc2.sh
 $ export ANDROID_SERIAL=192.168.53.1:9050
-$ ./install-sk2.sh bundle.tar.gz
+$ ./install-sc2.sh bundle.tar.gz
 ```
 
 !!! note
@@ -94,7 +94,7 @@ $ ninja -C build bundle
 Install on SkyController2:
 ```console
 $ export ANDROID_SERIAL=192.168.53.1:9050
-$ ./distro/install-sk2.sh build/src/dema-rc-bundle.tar.gz
+$ ./distro/install-sc2.sh build/src/dema-rc-bundle.tar.gz
 ```
 
 When developing on dema-rc and only modifying the main program, you can skip

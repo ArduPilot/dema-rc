@@ -37,7 +37,7 @@ fatal() {
 }
 
 # check if we are really connected to SkyController 2
-assert_sk2() {
+assert_sc2() {
 	uid=$(adb shell grep ro.parrot.build.uid /etc/build.prop)
 	version=$(adb shell grep ro.parrot.build.version /etc/build.prop)
 
@@ -121,7 +121,7 @@ summary_install() {
 
 parse_args "$@"
 
-assert_sk2
+assert_sc2
 
 register_cleanup
 relocate_bundle

@@ -62,7 +62,7 @@ build-armv7hf:
     paths:
       - build/inst
 
-pkg-sk2:
+pkg-sc2:
   image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
   stage: package
   variables:
@@ -76,7 +76,7 @@ pkg-sk2:
     paths:
       - dema-rc.tar.gz
 
-pkg-sk2-deps:
+pkg-sc2-deps:
   image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
   stage: package
   dependencies:
@@ -95,18 +95,18 @@ pkg-sk2-deps:
     paths:
       - deps.tar.gz
 
-bundle-sk2:
+bundle-sc2:
   image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
   stage: bundle
   dependencies:
     - build-armv7hf
-    - pkg-sk2
-    - pkg-sk2-deps
+    - pkg-sc2
+    - pkg-sc2-deps
   script:
     - mkdir -p build/bundle
     - tar -C build/bundle -xf dema-rc.tar.gz
     - tar -C build/bundle -xf deps.tar.gz
-    - cp -a distro/sk2/. build/bundle
+    - cp -a distro/sc2/. build/bundle
     - tar -C build/bundle -czf bundle.tar.gz .
   artifacts:
     name: dema-rc-bundle-$CI_COMMIT_REF_NAME
