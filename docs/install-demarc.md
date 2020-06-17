@@ -70,7 +70,7 @@ latest one:
 Extract it to `/opt` and add to PATH:
 
 ```console
-$ export PATH=/opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/bin/
+$ export PATH=/opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/bin/:$PATH
 ```
 
 Configure dema-rc:
