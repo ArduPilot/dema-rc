@@ -9,6 +9,7 @@ project(
         default_options: [
                 'c_std=gnu11',
                 'sysconfdir=/etc',
+                'prefix=/usr',
         ],
         meson_version : '>= 0.49',
 )
