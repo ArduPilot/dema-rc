@@ -19,11 +19,13 @@ exe_dema_rc = executable(
     install: true
 )
 
-bundle_tgt = custom_target('bundle',
-    command: [ '../tools/bundle-sc2.sh', '@OUTPUT@' ],
+board = get_option('board')
+bundle_tgt = custom_target('bundle_tgt',
+    command: [ '../tools/bundle.sh', '-b', board, '@OUTPUT@' ],
     output:  'dema-rc-bundle.tar.gz',
     input:   exe_dema_rc)
-# meson >= 0.52
+
+# TODO: meson >= 0.52 supports an alias in place of run_target
 # alias_target('bundle', bundle_tgt)
 run_target('bundle',
-    command: ['echo', 'Creating bundle...'], depends: bundle_tgt)
+    command: 'true', depends: bundle_tgt)
