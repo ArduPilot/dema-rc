@@ -132,6 +132,8 @@ status = [
         'lib directory:                     @0@'.format(libdir),
         'sysconf directory:                 @0@'.format(sysconfdir),
         'pkgsysconf directory:              @0@'.format(pkgsysconfdir),
+
+        'board:                             @0@'.format(get_option('board')),
         ''
 ]
 message('\n         '.join(status))

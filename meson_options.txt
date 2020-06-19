@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: LGPL-2.1+
+# Copyright (c) 2020 Lucas De Marchi <lucas.de.marchi@gmail.com>
+
+option('board', type : 'combo', choices : ['native', 'sc2'], value : 'native')
