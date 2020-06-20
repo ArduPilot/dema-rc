@@ -4,7 +4,6 @@ variables:
 stages:
   - container
   - build
-  - package
   - bundle
 
 container-armv7hf:
@@ -48,67 +47,27 @@ build-native:
     - meson setup build
     - ninja -C build
 
-build-armv7hf:
+build-armv7hf-sc2:
   image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
   stage: build
   script:
     - meson setup
-        --prefix=/usr
+        -Dboard=sc2
         --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf
         build
     - ninja -C build
-    - DESTDIR=inst ninja -C build install
   artifacts:
     paths:
-      - build/inst
-
-pkg-sc2:
-  image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
-  stage: package
-  variables:
-    GIT_STRATEGY: none
-  dependencies:
-    - build-armv7hf
-  script:
-    - tar -C build/inst -cpzf dema-rc.tar.gz .
-  artifacts:
-    name: dema-rc-$CI_COMMIT_REF_NAME
-    paths:
-      - dema-rc.tar.gz
-
-pkg-sc2-deps:
-  image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
-  stage: package
-  dependencies:
-    - build-armv7hf
-  script:
-    - ./tools/bundler.sh
-          -x 'ld-*.so' -x libc.so
-          -q qemu-arm-static
-          -o deps.tar
-          /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot
-          arm-buildroot-linux-gnueabihf
-          build/inst/usr/bin/dema-rc
-    - gzip deps.tar
-  artifacts:
-    name: dema-rc-deps-$CI_COMMIT_REF_NAME
-    paths:
-      - deps.tar.gz
+      - build/
 
 bundle-sc2:
   image: ${CI_REGISTRY}/${CI_PROJECT_PATH}/armv7hf:latest
   stage: bundle
   dependencies:
-    - build-armv7hf
-    - pkg-sc2
-    - pkg-sc2-deps
+    - build-armv7hf-sc2
   script:
-    - mkdir -p build/bundle
-    - tar -C build/bundle -xf dema-rc.tar.gz
-    - tar -C build/bundle -xf deps.tar.gz
-    - cp -a distro/sc2/. build/bundle
-    - tar -C build/bundle -czf bundle.tar.gz .
+    - ninja -C build bundle
   artifacts:
     name: dema-rc-bundle-$CI_COMMIT_REF_NAME
     paths:
-      - bundle.tar.gz
+      - build/dema-rc-bundle.tar.gz

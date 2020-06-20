@@ -19,7 +19,7 @@ are available directly from CI:
 
 ```console
 $ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sc2
-$ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/distro/install-sc2.sh
+$ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/tools/install-sc2.sh
 $ chmod +x install-sc2.sh
 $ export ANDROID_SERIAL=192.168.53.1:9050
 $ ./install-sc2.sh bundle.tar.gz
@@ -78,7 +78,9 @@ Configure dema-rc:
 
 ```console
 $ meson setup \
-    --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf
+    -Dboard=sc2 \
+    --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf \
+    build
 ```
 
 Build:
@@ -94,7 +96,7 @@ $ ninja -C build bundle
 Install on SkyController2:
 ```console
 $ export ANDROID_SERIAL=192.168.53.1:9050
-$ ./distro/install-sc2.sh build/src/dema-rc-bundle.tar.gz
+$ ./tools/install-sc2.sh build/dema-rc-bundle.tar.gz
 ```
 
 When developing on dema-rc and only modifying the main program, you can skip

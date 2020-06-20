@@ -29,7 +29,8 @@
 
 set -e
 
-PREFIX="/data/ftp/internal_000/dema-rc/usr"
+DEMA_RC_OVERLAY="/data/ftp/internal_000/dema-rc"
+PREFIX="$DEMA_RC_OVERLAY/usr"
 
 fatal() {
 	echo "$@" > /dev/stderr
@@ -75,21 +76,12 @@ parse_args() {
 	tarball=$1
 }
 
-relocate_bundle() {
+extract_tarball() {
 	DESTDIR=$(mktemp -d --tmpdir demarc-install.XXXXXXXX)
 	LIBDIR="$PREFIX/lib"
 	BINDIR="$PREFIX/bin"
 
-	tar -C "$DESTDIR" -xf "$tarball" \
-		--transform="s@./usr@.$PREFIX@" \
-		--transform="s@./lib@.$LIBDIR@"
-
-	# Change ld interpreter to be inside LIBDIR, if present
-	BINARY=${DESTDIR}${PREFIX}/bin/dema-rc
-	ld=$(readelf --program-headers $BINARY | sed -n 's/ *\[Requesting program interpreter: \(.*\)]/\1/p')
-	if [ -x ${DESTDIR}${PREFIX}${ld} ]; then
-		patchelf --set-interpreter ${PREFIX}${ld} "$BINARY"
-	fi
+	tar -C "$DESTDIR" -xf "$tarball"
 }
 
 calculate_space() {
@@ -124,7 +116,7 @@ parse_args "$@"
 assert_sc2
 
 register_cleanup
-relocate_bundle
+extract_tarball
 
 calculate_space
 assert_space
@@ -142,8 +134,8 @@ echo
 echo "Mounting / as rw..."
 mount -o remount,rw /
 
-echo "Removing previous installation under $PREFIX"
-rm -rf $PREFIX
+echo "Removing previous installation under $DEMA_RC_OVERLAY"
+rm -rf $DEMA_RC_OVERLAY
 EOF
 
 adb push $DESTDIR/. /

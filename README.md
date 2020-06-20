@@ -9,16 +9,9 @@ Binaries
 --------
 
 The latest binaries for master branch can be downloaded directly from CI
-for SkyController 2:
+for SkyController 2: [dema-rc bundle](https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sc2).
+This includes all dependencies and configuration files
 
-- [dema-rc bundle](https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sc2):
-  this includes all dependencies and configuration files
-- [dema-rc](https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/dema-rc.tar.gz?job=pkg-sc2)
-
-First file contains everything needed to be uploaded to SkyController2.
-The second one contains only the dema-rc binary (that can be used to
-speed up deployment when changing only the main source code). If in
-doubt, use the first.
 
 GIT
 ---
@@ -33,7 +26,7 @@ Requeriments
 
 **Build**:
 
-- meson >= 0.44
+- meson >= 0.49
 - ninja
 - gcc
 
