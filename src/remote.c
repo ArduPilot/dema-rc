@@ -74,7 +74,7 @@ static void sitl_send_pkt(const int val[], int count)
     struct rc_udp_sitl_packet *pkt = &remote_ctx.sitl_pkt;
     int i;
 
-    assert(count <= RCINPUT_UDP_NUM_CHANNELS);
+    assert(count <= SITL_NUM_CHANNELS);
 
     for (i = 0; i < count; i++)
         pkt->ch[i] = val[i];
@@ -82,13 +82,15 @@ static void sitl_send_pkt(const int val[], int count)
     _send(pkt, sizeof(*pkt));
 }
 
+static unsigned int last_xxx = 0;
+
 static void simple_send_pkt(const int val[], int count)
 {
     struct rc_udp_packet *pkt = &remote_ctx.pkt;
     ssize_t r;
     int i;
 
-    assert(count <= SITL_NUM_CHANNELS);
+    assert(count <= RCINPUT_UDP_NUM_CHANNELS);
 
     for (i = 0; i < count; i++)
         pkt->ch[i] = val[i];
