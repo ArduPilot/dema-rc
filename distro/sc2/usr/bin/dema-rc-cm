@@ -1,0 +1,101 @@
+#!/bin/sh
+
+ssid=$(cat /data/ftp/internal_000/ssid.txt)
+fifo="/tmp/run/dema-rc-cm"
+monitor_pid=0
+gcs_ip_monitor_pid=0
+
+notify_searching()
+{
+    mpp_bb_cli blink 3 0 1000 50
+}
+
+notify_connecting()
+{
+    mpp_bb_cli blink 7 3  200 20
+}
+
+notify_connected()
+{
+    mpp_bb_cli on 3
+}
+
+forward_ports()
+{
+    drone_ip="192.168.42.1"
+    iptables -t nat -F
+
+    # Forward traffic on port 14550 to drone: this allows to communicate
+    # with it when it's running on "udpin" mode
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -A PREROUTING -p udp --dport 14550 -j DNAT --to-destination $drone_ip
+    iptables -t nat -A POSTROUTING -p udp --dport 14550 -j MASQUERADE
+}
+
+gcs_ip_monitor()
+{
+    gcs_ip=
+
+    while [ 1 ]; do
+        gcs_ip=$(tcpdump -n -p udp -i eth0 port 14550 and not dst host 192.168.53.1 2>/dev/null | head -n 1 | awk '{split($5, a, "."); printf "%s.%s.%s.%s", a[1], a[2], a[3], a[4]}')
+        if [ -n "$gcs_ip" ]; then
+            break
+        fi
+        sleep 2
+    done
+
+    # route video
+    iptables -t nat -A PREROUTING -p udp --dport 8888 -j DNAT --to-destination $gcs_ip
+    iptables -t nat -A POSTROUTING -p udp --dport 8888 -j MASQUERADE
+}
+
+wifi_monitor()
+{
+    rm -f $fifo
+    mkfifo $fifo
+
+    wifid-cli monitor 2>$fifo &
+    monitor_pid=$!
+    echo $monitor_pid
+
+    while read -r line; do
+        if [ "$line" = "state:    : connected" ] ||
+           [ "$line" = "network changed: Connected" ]; then
+            notify_connected
+            forward_ports
+            gcs_ip_monitor 2>/dev/null >&2 &
+            gcs_ip_monitor_pid=$!
+        elif [ "$line" = "state:    : disconnected" ] ||
+             [ "$line" = "network changed: Connection Failure" ] ||
+             [ "$line" = "network changed: Disconnected" ]; then
+            notify_searching
+            wifid-cli connect "$ssid"
+            if [ $gcs_ip_monitor_pid -ne 0 ]; then
+                kill $gcs_ip_monitor_pid
+                gcs_ip_monitor_pid=0
+            fi
+        fi
+    done < $fifo
+}
+
+cleanup()
+{
+    ulogger -s -p I -t dema-rc 'Stop dema-rc-cm'
+
+    [ $monitor_pid -ne 0 ] && kill $monitor_pid
+    [ $gcs_ip_monitor_pid -ne 0 ] && kill $gcs_ip_monitor_pid
+
+    rm -f /tmp/run/dema-rc-cm
+    notify_searching
+    exit 0
+}
+
+# Make sure mppd is not messing with the network
+pstop mppd
+pstop sensorsd-mpp
+
+trap cleanup INT TERM
+
+ulogger -s -p -I -t dema-rc "Start dema-rc-cm"
+
+wifi_monitor

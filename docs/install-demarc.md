@@ -1,7 +1,8 @@
 # Dema-rc on SC2
 
 Here you will find information on how to get dema-rc installed and configured
-on SkyController2 and ArduPilot on Disco.
+on SkyController2. After ensuring you are connected through adb, you have 2 options:
+use pre-built binaries or install from source. See details below.
 
 ## Connect to SkyController2 via adb
 
@@ -11,17 +12,17 @@ Turn on the controller and connect it to your computer via usb-ethernet device. 
 $ adb connect 192.168.53.1:9050
 ```
 
-## Install latest version
+## Install prebuilt binaries
 
 Currently there is no released version, so just use latest master branch. Binaries
 are available directly from CI:
 
 ```console
-$ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sk2
-$ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/distro/install-sk2.sh
-$ chmod +x install-sk2.sh
+$ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sc2
+$ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/tools/install-sc2.sh
+$ chmod +x install-sc2.sh
 $ export ANDROID_SERIAL=192.168.53.1:9050
-$ ./install-sk2.sh bundle.tar.gz
+$ ./install-sc2.sh bundle.tar.gz
 ```
 
 !!! note
@@ -59,7 +60,7 @@ Fixing up file permissions...
 Installation finished successfully, please reboot SkyController 2
 ```
 
-## Build dema-rc from source
+## Build and install dema-rc from source
 
 You can also build dema-rc. For that you will need an armv7 toolchain with some
 specific tunables. Since we build dema-rc on CI, we already have a recommended
@@ -70,25 +71,39 @@ latest one:
 Extract it to `/opt` and add to PATH:
 
 ```console
-$ export PATH=/opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/bin/
+$ export PATH=/opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/bin/:$PATH
 ```
 
 Configure dema-rc:
 
 ```console
 $ meson setup \
-    --prefix=/usr \
-    --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf
+    -Dboard=sc2 \
+    --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf \
+    build
 ```
 
 Build:
 ```console
-ninja -C build
+$ ninja -C build
 ```
 
-Install/deploy:
+Create bundle to install on SkyControler2:
 ```console
-adb push build/src/dema-rc /data/ftp/internal_000/dema-rc/usr/bin/dema-rc
+$ ninja -C build bundle
+```
+
+Install on SkyController2:
+```console
+$ export ANDROID_SERIAL=192.168.53.1:9050
+$ ./tools/install-sc2.sh build/dema-rc-bundle.tar.gz
+```
+
+When developing on dema-rc and only modifying the main program, you can skip
+the bundle creation and push only that binary:
+
+```console
+$ adb push build/src/dema-rc /data/ftp/internal_000/dema-rc/usr/bin/dema-rc
 ```
 
 Note that the command above installs only the main binary. Check in the install

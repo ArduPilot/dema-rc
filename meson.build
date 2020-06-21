@@ -9,6 +9,7 @@ project(
         default_options: [
                 'c_std=gnu11',
                 'sysconfdir=/etc',
+                'prefix=/usr',
         ],
         meson_version : '>= 0.49',
 )
@@ -131,6 +132,8 @@ status = [
         'lib directory:                     @0@'.format(libdir),
         'sysconf directory:                 @0@'.format(sysconfdir),
         'pkgsysconf directory:              @0@'.format(pkgsysconfdir),
+
+        'board:                             @0@'.format(get_option('board')),
         ''
 ]
 message('\n         '.join(status))
