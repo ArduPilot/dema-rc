@@ -18,7 +18,7 @@ Currently there is no released version, so just use latest master branch. Binari
 are available directly from CI:
 
 ```console
-$ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/bundle.tar.gz?job=bundle-sc2
+$ curl -JOL https://gitlab.com/lucas.de.marchi/dema-rc/-/jobs/artifacts/master/raw/build/dema-rc-bundle.tar.gz?job=bundle-sc2
 $ curl -JOL https://raw.githubusercontent.com/lucasdemarchi/dema-rc/master/tools/install-sc2.sh
 $ chmod +x install-sc2.sh
 $ export ANDROID_SERIAL=192.168.53.1:9050
