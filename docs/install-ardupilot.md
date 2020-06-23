@@ -27,6 +27,9 @@ Method | Command
 WiFi   | `adb connect 192.168.42.1:9050`
 USB    | `adb connect 192.168.43.1:9050`
 
+If you choose USB, make sure to activate it first: double press the power
+button.
+
 ## Copy some additional libraries:
 
 ```console
