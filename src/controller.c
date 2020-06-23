@@ -48,6 +48,8 @@ enum SC2Btn {
     SC2BTN_RIGHT,
     SC2BTN_RIGHT_WHEEL_LEFT,
     SC2BTN_RIGHT_WHEEL_RIGHT,
+    SC2BTN_STICK_LEFT_PRESS,
+    SC2BTN_STICK_RIGHT_PRESS,
     _SC2BTN_COUNT,
 };
 
@@ -55,7 +57,7 @@ struct Controller {
     int fd;
     bool grab_device;
 
-    /* Axis + buttons: 14 channels */
+    /* Axis + buttons: 16 channels */
     int val[_AXIS_COUNT + _SC2BTN_COUNT];
 
     struct {
@@ -119,10 +121,12 @@ static int get_btn_from_evdev(unsigned long code)
     case BTN_BASE:
         return SC2BTN_LEFT;
     case BTN_BASE2:
-    case BTN_BASE3:
-    case BTN_BASE4:
         /* ??? in theory we have, but I couldn't find */
         return -1;
+    case BTN_BASE3:
+        return SC2BTN_STICK_LEFT_PRESS;
+    case BTN_BASE4:
+        return SC2BTN_STICK_RIGHT_PRESS;
     case BTN_BASE5:
         return SC2BTN_RIGHT_WHEEL_LEFT;
     case BTN_BASE6:
