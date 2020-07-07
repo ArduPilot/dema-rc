@@ -91,6 +91,18 @@ Set "video source" to "UDP h.264 video stream"
 Set "UDP port" to "8888"
 
 
+## Starting ArduPlane and connecting to GCS.
+Switch on Disco and SC2
+On SC2, click the settings button, expect LED flashing blue, then go solid blue.
+Click the pitot tube three times, see it flash blue/red and play the ArduPilot boot sound.
+You should now see the servos move on RC input and attitude changes.
+Start QGC on a computer and connect SC2 to the computer using ethernet adapter and ethernet cable.
+(The ethernet interface of the computer should be configured for DHCP.)
+
+Start the preconfigured QGC, telemetry will autoconnect (you should see voltage/attitude)
+Press button "B" on SC2 to toggle streaming, you should now the video stream.
+
+
 ## Automatically start ArduPilot
 
 Although possible, it's not provided a way in this documentation to start only
