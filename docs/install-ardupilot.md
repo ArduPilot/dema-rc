@@ -19,6 +19,8 @@ $ ./waf plane
 
 ## Connect to Disco
 
+Double click the pitot-button on Disco to enable incoming connections.
+
 You have 2 options to connect to Disco: either via WiFi or via USB (using rndis, i.e. it will
 create an ethernet link over USB):
 
