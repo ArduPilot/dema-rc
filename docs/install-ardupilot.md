@@ -81,6 +81,16 @@ This should start ArduPilot (so you will hear the buzzer) and telemetry will
 be sent via both USB and WiFi. Now you should be able to start your GCS and
 communicate with the drone, go through calibration procedures, etc.
 
+## Configuring QGC for Disco
+Start QGC,  enter application settings and comm links.
+Click "add" , configure Name as "Disco" , type as UDP, check "Automatically connect on Start"
+Let listening port be 14550, under Target hosts, click "Add" , enter 192.168.53.1
+Click OK
+Go to "general" , scroll down to "video" section.
+Set "video source" to "UDP h.264 video stream"
+Set "UDP port" to "8888"
+
+
 ## Automatically start ArduPilot
 
 Although possible, it's not provided a way in this documentation to start only
