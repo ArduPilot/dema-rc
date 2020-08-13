@@ -19,6 +19,8 @@ $ ./waf plane
 
 ## Connect to Disco
 
+Double click the pitot-button on Disco to enable incoming connections.
+
 You have 2 options to connect to Disco: either via WiFi or via USB (using rndis, i.e. it will
 create an ethernet link over USB):
 
@@ -70,7 +72,7 @@ $ adb shell
 $ kk
 $ LD_LIBRARY_PATH=/data/ftp/internal_000/ardupilot/lib \
     /data/ftp/internal_000/ardupilot/arduplane  \
-        -A udp:192.168.42.255:14550:bcast \
+        -A udpin:0.0.0.0:14550 \
         -B /dev/ttyPA1 \
         -C udp:192.168.43.255:14550:bcast
 ```
@@ -78,6 +80,28 @@ $ LD_LIBRARY_PATH=/data/ftp/internal_000/ardupilot/lib \
 This should start ArduPilot (so you will hear the buzzer) and telemetry will
 be sent via both USB and WiFi. Now you should be able to start your GCS and
 communicate with the drone, go through calibration procedures, etc.
+
+## Configuring QGC for Disco
+Start QGC,  enter application settings and comm links.
+Click "add" , configure Name as "Disco" , type as UDP, check "Automatically connect on Start"
+Let listening port be 14550, under Target hosts, click "Add" , enter 192.168.53.1
+Click OK
+Go to "general" , scroll down to "video" section.
+Set "video source" to "UDP h.264 video stream"
+Set "UDP port" to "8888"
+
+
+## Starting ArduPlane and connecting to GCS.
+Switch on Disco and SC2
+On SC2, click the settings button, expect LED flashing blue, then go solid blue.
+Click the pitot tube three times, see it flash blue/red and play the ArduPilot boot sound.
+You should now see the servos move on RC input and attitude changes.
+Start QGC on a computer and connect SC2 to the computer using ethernet adapter and ethernet cable.
+(The ethernet interface of the computer should be configured for DHCP.)
+
+Start the preconfigured QGC, telemetry will autoconnect (you should see voltage/attitude)
+Press button "B" on SC2 to toggle streaming, you should now the video stream.
+
 
 ## Automatically start ArduPilot
 
