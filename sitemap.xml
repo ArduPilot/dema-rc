@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
+     <loc>https://lucasdemarchi.github.io/dema-rc/</loc>
+     <lastmod>2020-08-13</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://lucasdemarchi.github.io/dema-rc/install-demarc/</loc>
+     <lastmod>2020-08-13</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://lucasdemarchi.github.io/dema-rc/install-ardupilot/</loc>
+     <lastmod>2020-08-13</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://lucasdemarchi.github.io/dema-rc/rc-channel/</loc>
+     <lastmod>2020-08-13</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+</urlset>
