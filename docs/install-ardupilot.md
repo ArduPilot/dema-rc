@@ -72,7 +72,7 @@ $ adb shell
 $ kk
 $ LD_LIBRARY_PATH=/data/ftp/internal_000/ardupilot/lib \
     /data/ftp/internal_000/ardupilot/arduplane  \
-        -A udp:192.168.42.255:14550:bcast \
+        -A udpin:0.0.0.0:14550 \
         -B /dev/ttyPA1 \
         -C udp:192.168.43.255:14550:bcast
 ```
