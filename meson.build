@@ -11,7 +11,7 @@ project(
                 'sysconfdir=/etc',
                 'prefix=/usr',
         ],
-        meson_version : '>= 0.49',
+        meson_version : '>= 0.57',
 )
 project_description = 'Linux Drone Remote Controller'
 
