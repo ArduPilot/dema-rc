@@ -82,8 +82,6 @@ static void sitl_send_pkt(const int val[], int count)
     _send(pkt, sizeof(*pkt));
 }
 
-static unsigned int last_xxx = 0;
-
 static void simple_send_pkt(const int val[], int count)
 {
     struct rc_udp_packet *pkt = &remote_ctx.pkt;
