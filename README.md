@@ -26,7 +26,7 @@ Requeriments
 
 **Build**:
 
-- meson >= 0.49
+- meson >= 0.57
 - ninja
 - gcc
 
