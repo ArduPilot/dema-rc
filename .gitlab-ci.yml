@@ -38,7 +38,7 @@ container-armv7hf:
       - .ci/buildroot.config
 
 build-native:
-  image: fedora:31
+  image: fedora:34
   stage: build
   before_script:
     - dnf upgrade -y
