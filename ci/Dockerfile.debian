@@ -1,5 +1,5 @@
 FROM debian:buster as builder
-ARG BUILDROOT_VERSION=2019.08.2
+ARG BUILDROOT_VERSION=2021.02.1
 
 RUN apt update && apt install -y \
 	bc \
