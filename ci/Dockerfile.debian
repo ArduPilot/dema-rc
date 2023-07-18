@@ -38,8 +38,11 @@ RUN apt update && apt install -y \
 	gcc \
 	python3-pip \
 	qemu-user-static \
+        ninja-build \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& mkdir -p /src
 RUN pip3 install meson
+# If meson cannot find the right ninja version, the solution is to uninstall the ninja that came with meson: https://github.com/rizinorg/cutter/issues/2733
+RUN pip3 uninstall ninja
 WORKDIR /src
 COPY --from=builder /opt /opt
