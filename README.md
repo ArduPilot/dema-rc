@@ -65,7 +65,7 @@ $ docker build -t disco-builder -f ci/Dockerfile.debian ci/
 ```console
 $ mkdir build-armv7
 $ docker run -it -v .:/src disco-builder meson setup --cross-file /opt/arm-buildroot-linux-gnueabihf_sdk-buildroot/etc/meson/cross-compilation.conf build-armv7
-$ docker run -it -v .:/src ninja -C build-armv7
+$ docker run -it -v .:/src disco-builder ninja -C build-armv7
 ```
 
 If you prefer, you can also copy the toolchain off the container and just use it in your
