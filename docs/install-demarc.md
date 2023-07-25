@@ -4,6 +4,12 @@ Here you will find information on how to get dema-rc installed and configured
 on SkyController2. After ensuring you are connected through adb, you have 2 options:
 use pre-built binaries or install from source. See details below.
 
+### SkyController2 or SkyController2P?
+
+* The SkyController2 comes with **silver** joysticks, and you should use the `install-sc2.sh` script as outlined in all the steps below.
+* The SkyController2P comes with **black** joysticks, and you should use the `install-sc2P.sh` script instead, otherwise following all the steps below.
+
+
 ## Connect to SkyController2 via adb
 
 Turn on the controller and connect it to your computer via usb-ethernet device. Connect to it via adb:
@@ -99,6 +105,12 @@ $ export ANDROID_SERIAL=192.168.53.1:9050
 $ ./tools/install-sc2.sh build/dema-rc-bundle.tar.gz
 ```
 
+or install on SkyController2P:
+```console
+$ export ANDROID_SERIAL=192.168.53.1:9050
+$ ./tools/install-sc2P.sh build/dema-rc-bundle.tar.gz
+```
+
 When developing on dema-rc and only modifying the main program, you can skip
 the bundle creation and push only that binary:
 
@@ -113,7 +125,8 @@ log above the other files that need to be sent if you modified it.
 
 As part of the installed files above, we install a script to start, stop and monitor the WiFi
 connections. Since SkyController2 will connect to Disco, you need to configure its SSID. The
-file is in `/data/ftp/internal_000/ssid.txt`.
+file is in `/data/ftp/internal_000/ssid.txt`. For the SkyController2P, this should already be
+generated when you run the installation script.
 
 ## Automatically start dema-rc
 
@@ -123,5 +136,14 @@ the original SW stack as the default. To switch to dema-rc to use with ArduPilot
 
 The LED that was red/green will now behave as following:
 
-- Blinking blue when dema-rc is started and until it connects to WiFi
-- Solid blue while it remains connected to a WiFi network.
+- On the SkyController2:
+  - Blinking blue when dema-rc is started and until it connects to WiFi
+  - Solid blue while it remains connected to a WiFi network.
+
+- On the SkyController2P:
+  - Blinking blue and white when dema-rc is started and until it connects to WiFi
+  - Blinking magenta when it's connecting to the network
+  - Slow blinking blue while it remains connected to a WiFi network.
+  - Otherwise it will rapidly blink green and then switch to red when not using the dema-rc
+
+
